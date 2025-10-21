@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Información y Recursos{% endblock %}
+
+{% block content %}
+<div class="info-page">
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="info-hero">
+            <div class="hero-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <h1> Información y Recursos de Ayuda</h1>
+            <p class="hero-subtitle">Encuentra apoyo inmediato y recursos confiables para situaciones de emergencia</p>
+        </div>
+
+        <!-- Líneas de Emergencia -->
+        <section class="info-section">
+            <div class="section-header">
+                <h2> Líneas de Ayuda en Colombia</h2>
+                <p class="section-description">Disponibles 24/7 para asistencia inmediata</p>
+            </div>
+            
+            <div class="resources-grid">
+                <div class="resource-card emergency pulse-border">
+                    <div class="card-icon emergency-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>123</h3>
+                        <span class="card-badge emergency-badge">EMERGENCIAS</span>
+                        <p class="card-availability">Disponible 24/7</p>
+                        <p class="card-description">Línea nacional de emergencias para todo tipo de situaciones urgentes.</p>
+                    </div>
+                </div>
+                
+                <div class="resource-card purple-card">
+                    <div class="card-icon purple-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>155</h3>
+                        <span class="card-badge purple-badge">LÍNEA PÚRPURA</span>
+                        <p class="card-availability"> Disponible 24/7</p>
+                        <p class="card-description">Orientación a mujeres víctimas de violencias. Atención psicológica y jurídica.</p>
+                    </div>
+                </div>
+                
+                <div class="resource-card blue-card">
+                    <div class="card-icon blue-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 2a10 10 0 0 0-9.95 9h11.64L9.74 7.05a1 1 0 0 1 1.41-1.41l5.66 5.65a1 1 0 0 1 0 1.42l-5.66 5.65a1 1 0 0 1-1.41 0 1 1 0 0 1 0-1.41L13.69 13H2.05A10 10 0 1 0 12 2z"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>106</h3>
+                        <span class="card-badge blue-badge">SALUD MENTAL</span>
+                        <p class="card-availability"> Disponible 24/7</p>
+                        <p class="card-description">Línea de atención en salud mental y prevención del suicidio.</p>
+                    </div>
+                </div>
+                
+                <div class="resource-card green-card">
+                    <div class="card-icon green-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>141</h3>
+                        <span class="card-badge green-badge">ICBF</span>
+                        <p class="card-availability"> Disponible 24/7</p>
+                        <p class="card-description">Instituto Colombiano de Bienestar Familiar. Protección de niños, niñas y familias.</p>
+                    </div>
+                </div>
+                
+                <div class="resource-card orange-card">
+                    <div class="card-icon orange-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>122</h3>
+                        <span class="card-badge orange-badge">FISCALÍA</span>
+
+                        <p class="card-description">Denuncias y atención a víctimas de delitos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categorías de Ayuda -->
+        <section class="info-section">
+            <div class="section-header">
+
+                <p class="section-description">Encuentra el tipo de apoyo que necesitas</p>
+            </div>
+            
+            <div class="categories-grid">
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-icon red-gradient">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9 22 9 12 15 12 15 22"/>
+                            </svg>
+                        </div>
+                        <h4>Violencia Doméstica</h4>
+                    </div>
+                    <p class="category-description">Si estás sufriendo violencia física, psicológica o sexual en tu hogar, puedes:</p>
+                    <ul class="category-list">
+                        <li>
+                        
+                            <span>Llamar al <strong>155</strong> o <strong>123</strong> inmediatamente</span>
+                        </li>
+                        <li>
+                            
+                            <span>Acudir a una Comisaría de Familia</span>
+                        </li>
+                        <li>
+     
+                            <span>Solicitar medidas de protección</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-icon purple-gradient">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <h4>Acoso</h4>
+                    </div>
+                    <p class="category-description">Acoso laboral, escolar o en línea:</p>
+                    <ul class="category-list">
+                        <li>
+                
+                            <span>Documenta las situaciones</span>
+                        </li>
+                        <li>
+              
+                            <span>Reporta a autoridades competentes</span>
+                        </li>
+                        <li>
+                         
+                            <span>Busca apoyo psicológico</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-icon blue-gradient">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h4>Salud Mental</h4>
+                    </div>
+                    <p class="category-description">Depresión, ansiedad, pensamientos suicidas:</p>
+                    <ul class="category-list">
+                        <li>
+                            <span class="list-icon"></span>
+                            <span>Llama al <strong>106</strong> para apoyo inmediato</span>
+                        </li>
+                        <li>
+                            <span class="list-icon"></span>
+                            <span>Contacta a tu EPS para atención psicológica</span>
+                        </li>
+                        <li>
+                            <span class="list-icon"></span>
+                            <span>Habla con personas de confianza</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-icon green-gradient">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <h4> Ayuda Social</h4>
+                    </div>
+                    <p class="category-description">Apoyo psicológico y social:</p>
+                    <ul class="category-list">
+                        <li>
+                            <span class="list-icon"></span>
+                            <span>ICBF: <strong>141</strong></span>
+                        </li>
+                        <li>
+                            <span class="list-icon"></span>
+                            <span>Secretarías de Integración Social</span>
+                        </li>
+                        <li>
+                            <span class="list-icon"></span>
+                            <span>Organizaciones comunitarias</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Información Importante -->
+        <section class="info-section">
+            <div class="section-header">
+                <h2>Información Importante</h2>
+            </div>
+            
+            <div class="warning-box-enhanced">
+                <div class="warning-icon-large">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <div class="warning-content">
+                    <h3>Este chatbot NO reemplaza atención profesional</h3>
+                    <p class="warning-emergency">Si estás en peligro inmediato, llama al <strong>123</strong> ahora mismo.</p>
+                    <p>Este servicio es una herramienta de orientación inicial. Para atención especializada, contacta a profesionales de la salud, trabajadores sociales o autoridades competentes.</p>
+                    <div class="warning-features">
+                        <div class="feature-item">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Orientación inicial</span>
+                        </div>
+                        <div class="feature-item">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Recursos confiables</span>
+                        </div>
+                        <div class="feature-item">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Disponible 24/7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Botón de regreso -->
+        <div class="back-to-chat">
+            <a href="/" class="btn-primary-enhanced">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Volver al Chat
+            </a>
+        </div>
+    </div> 
+</div>
+{% endblock %}

@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración - BOTI{% endblock %}
+
+{% block content %}
+<style>
+/* Estilos específicos para el panel de admin */
+.admin-page {
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #f0f9ff 100%);
+    padding: 2rem 0;
+}
+
+.admin-header {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeInDown 0.6s ease-out;
+}
+
+.admin-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    font-size: 1.75rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.admin-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0e7ff);
+    border-radius: 12px;
+}
+
+.user-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.75rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card:nth-child(2)::before {
+    background: linear-gradient(90deg, #ef4444, #f97316);
+}
+
+.stat-card:nth-child(3)::before {
+    background: linear-gradient(90deg, #10b981, #14b8a6);
+}
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.icon-blue {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+
+.icon-blue svg {
+    stroke: #2563eb;
+}
+
+.icon-red {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+}
+
+.icon-red svg {
+    stroke: #ef4444;
+}
+
+.icon-green {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+}
+
+.icon-green svg {
+    stroke: #059669;
+}
+
+.stat-header h3 {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin: 0;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.data-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.7s ease-out;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--bg-color);
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.refresh-btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 10px;
+    border: 2px solid var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.refresh-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+}
+
+.refresh-btn svg {
+    transition: transform 0.5s ease;
+}
+
+.refresh-btn:active svg {
+    transform: rotate(360deg);
+}
+
+.list-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.case-item,
+.alarm-item {
+    padding: 1.25rem;
+    border-radius: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.case-item {
+    background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+    border: 2px solid #e5e7eb;
+}
+
+.case-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.alarm-item {
+    background: linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%);
+    border: 2px dashed #fca5a5;
+    animation: pulse-alarm 2s ease-in-out infinite;
+}
+
+.alarm-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+}
+
+@keyframes pulse-alarm {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+}
+
+.item-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.item-main {
+    flex: 1;
+}
+
+.item-id {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.alarm-item .item-id {
+    color: #ef4444;
+}
+
+.item-summary {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.item-meta {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    background: white;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.item-aside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 2px solid;
+}
+
+.badge-open {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #93c5fd;
+}
+
+.badge-closed {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+
+.badge-critical {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.badge-high {
+    background: #fed7aa;
+    color: #9a3412;
+    border-color: #fdba74;
+}
+
+.risk-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .item-content {
+        flex-direction: column;
+    }
+
+    .item-aside {
+        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+}
+</style>
+
+<div class="admin-page">
+    <div class="container" id="admin-root">
+        <div class="admin-header">
+            <h2>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z"/>
+                    <path d="M2 22c0-4.418 3.582-8 8-8h4c4.418 0 8 3.582 8 8"/>
+                </svg>
+                Panel de Administración
+            </h2>
+            <div class="admin-user-info">
+                <span class="user-badge">👤 Admin</span>
+                <span id="user-name" style="font-weight:600;color:var(--text-primary);"></span>
+            </div>
+        </div>
+
+        <div id="admin-guard" class="auth-error" role="alert" style="display:none;"></div>
+
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Total Casos</h3>
+                    <div class="stat-icon icon-blue">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="cases-count">0</div>
+                <div class="stat-label">Registrados en el sistema</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Alarmas Activas</h3>
+                    <div class="stat-icon icon-red">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="alarms-count" style="-webkit-text-fill-color:#ef4444;color:#ef4444;">0</div>
+                <div class="stat-label">Requieren atención inmediata</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Última Actualización</h3>
+                    <div class="stat-icon icon-green">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="last-update" style="font-size:1.1rem;color:var(--text-primary);font-weight:600;margin-top:0.5rem;">—</div>
+                <div class="stat-label">Sincronización del sistema</div>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <div class="section-header">
+                <h3>
+                    📋 Casos Registrados
+                </h3>
+                <button id="refresh-btn" class="refresh-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+            <div id="cases-list" class="list-container"></div>
+        </div>
+
+        <div class="data-section">
+            <div class="section-header">
+                <h3>
+                    🚨 Alarmas de Emergencia
+                </h3>
+            </div>
+            <div id="alarms-list" class="list-container"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

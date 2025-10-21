@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Chat de Apoyo - Inicio{% endblock %}
+
+{% block nav_chat %}active{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-sidebar">
+        <div class="info-panel">
+            <div class="sidebar-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <h3>Líneas de Emergencia</h3>
+            </div>
+            <ul class="emergency-contacts">
+                <li class="emergency-card">
+                    <div class="emergency-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                    </div>
+                    <div class="emergency-info">
+                        <strong>123</strong>
+                        <span>Emergencias General</span>
+                    </div>
+                </li>
+                <li class="emergency-card">
+                    <div class="emergency-icon purple">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="emergency-info">
+                        <strong>155</strong>
+                        <span>Línea Púrpura</span>
+                    </div>
+                </li>
+                <li class="emergency-card">
+                    <div class="emergency-icon mental">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+                    <div class="emergency-info">
+                        <strong>106</strong>
+                        <span>Salud Mental</span>
+                    </div>
+                </li>
+                <li class="emergency-card">
+                    <div class="emergency-icon icbf">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                    </div>
+                    <div class="emergency-info">
+                        <strong>141</strong>
+                        <span>ICBF - Familias</span>
+                    </div>
+                </li>
+            </ul>
+            <div class="info-note">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <p><strong>Recuerda:</strong> No estás solo/a. Hay personas que pueden y quieren ayudarte.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-main">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" fill="url(#gradient1)"/>
+                    <path d="M20 10c-5.5 0-10 3.5-10 8 0 2.5 1.2 4.7 3.2 6.2-.3 1.5-1 3-2 4 2.5-0.5 4.8-1.8 6.5-3.5 0.7 0.2 1.5 0.3 2.3 0.3 5.5 0 10-3.5 10-8s-4.5-8-10-8z" fill="white"/>
+                    <circle cx="15" cy="17" r="1.5" fill="url(#gradient1)"/>
+                    <circle cx="20" cy="17" r="1.5" fill="url(#gradient1)"/>
+                    <circle cx="25" cy="17" r="1.5" fill="url(#gradient1)"/>
+                    <defs>
+                        <linearGradient id="gradient1" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" style="stop-color:#6366f1"/>
+                            <stop offset="100%" style="stop-color:#8b5cf6"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div>
+                    <h2>Chat de Apoyo</h2>
+                    <p class="status">
+                        <span class="status-dot online"></span> 
+                        Asistente en línea
+                    </p>
+                </div>
+            </div>
+            <button class="info-toggle" id="infoToggle" aria-label="Mostrar información">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <div class="welcome-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <h3>Bienvenido, soy BOTI</h3>
+                <p class="welcome-subtitle">Estamos aquí para escucharte</p>
+            </div>
+            
+            <div class="message bot-message">
+                <div class="message-avatar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                </div>
+                <div class="message-wrapper">
+                    <div class="message-content">
+                        <p>Hola, soy BOTI. Soy tu asistente de bienestar total.</p>
+                        <p>Por favor, cuéntame cómo te sientes o qué situación estás enfrentando.
+Todo lo que compartas será tratado con respeto, empatía y absoluta confidencialidad.</p>
+                    </div>
+                    <span class="message-time">Ahora</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                <div class="typing-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                </div>
+                <div class="typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <span class="typing-text">BOTI está escribiendo...</span>
+            </div>
+            <form id="chatForm" class="chat-input-form">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="messageInput" 
+                        placeholder="Escribe tu mensaje aquí..." 
+                        rows="1"
+                        maxlength="500"
+                    ></textarea>
+                    <span class="char-counter" id="charCounter">0/500</span>
+                </div>
+                <button type="submit" id="sendButton" aria-label="Enviar mensaje">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                </button>
+            </form>
+            <p class="privacy-note">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Tus conversaciones son privadas y confidenciales
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Toggle info panel en móvil
+const infoToggle = document.getElementById('infoToggle');
+const chatSidebar = document.querySelector('.chat-sidebar');
+
+if (infoToggle) {
+    infoToggle.addEventListener('click', () => {
+        chatSidebar.classList.toggle('show');
+    });
+}
+
+// Auto-resize textarea
+const messageInput = document.getElementById('messageInput');
+const charCounter = document.getElementById('charCounter');
+
+if (messageInput) {
+    messageInput.addEventListener('input', function() {
+        // Auto resize
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        
+        // Update character counter
+        if (charCounter) {
+            charCounter.textContent = `${this.value.length}/500`;
+        }
+    });
+    
+    // Reset height on form submit
+    const chatForm = document.getElementById('chatForm');
+    if (chatForm) {
+        chatForm.addEventListener('submit', function() {
+            messageInput.style.height = 'auto';
+            if (charCounter) {
+                charCounter.textContent = '0/500';
+            }
+        });
+    }
+}
+
+// Scroll to bottom on new message
+function scrollToBottom() {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+}
+</script>
+{% endblock %}

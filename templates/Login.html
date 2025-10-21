@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - BOTI{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Logo y título -->
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="10" rx="2"/>
+                        <circle cx="8" cy="15" r="1"/>
+                        <circle cx="16" cy="15" r="1"/>
+                        <path d="M9 7h6"/>
+                        <path d="M12 7v4"/>
+                    </svg>
+                </div>
+                <h2>Bienvenido a BOTI</h2>
+                <p class="auth-subtitle">Inicia sesión para continuar</p>
+            </div>
+
+            <!-- Formulario -->
+            <form method="POST" class="auth-form" id="login-form">
+                <div class="auth-input-group">
+                    <label for="username">Nombre de usuario</label>
+                    <div class="input-with-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <input 
+                            type="text" 
+                            id="username"
+                            name="username" 
+                            placeholder="Ingresa tu usuario" 
+                            required 
+                            class="auth-input"
+                        >
+                    </div>
+                </div>
+
+                <div class="auth-input-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-with-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <input 
+                            type="password" 
+                            id="password"
+                            name="password" 
+                            placeholder="Ingresa tu contraseña" 
+                            required 
+                            class="auth-input"
+                        >
+                    </div>
+                </div>
+
+                <div class="auth-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" id="remember">
+                        <span>Recordarme</span>
+                    </label>
+                    <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    <span>Iniciar Sesión</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Mensaje de error de autenticación -->
+            <div id="auth-error" class="auth-error" role="alert" style="display:none;"></div>
+
+            <!-- Registro -->
+            <div class="auth-footer">
+                <p>¿No tienes una cuenta? <a href="#" class="register-link">Regístrate aquí</a></p>
+            </div>
+
+            <!-- Nota de privacidad -->
+            <div class="auth-privacy">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Tus datos están protegidos y seguros</span>
+            </div>
+        </div>
+
+        <!-- Decoración -->
+        <div class="auth-decoration">
+            <div class="decoration-circle circle-1"></div>
+            <div class="decoration-circle circle-2"></div>
+            <div class="decoration-circle circle-3"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

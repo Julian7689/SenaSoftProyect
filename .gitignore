@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Logs
+logs/
+*.log
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Modelos entrenados (pueden ser muy grandes)
+models/trained/*.pkl
+models/trained/*.pt
+models/trained/*.h5
+models/trained/*.pth
+models/checkpoints/*.ckpt
+
+# Datos sensibles
+*.key
+secrets/
+credentials.json
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+.webassets-cache
+
+# Base de datos (si se usa)
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos temporales
+*.tmp
+*.temp

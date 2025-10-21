@@ -1,0 +1,53 @@
+{
+  "emergency_contacts": {
+    "colombia": {
+      "policia": {
+        "number": "123",
+        "name": "Línea de Emergencias Nacional",
+        "description": "Atención 24/7 para todo tipo de emergencias"
+      },
+      "violencia_mujer": {
+        "number": "155",
+        "name": "Línea Púrpura",
+        "description": "Orientación a mujeres víctimas de violencias"
+      },
+      "bienestar_familiar": {
+        "number": "141",
+        "name": "ICBF",
+        "description": "Instituto Colombiano de Bienestar Familiar"
+      },
+      "salud_mental": {
+        "number": "106",
+        "name": "Línea de Atención en Salud Mental",
+        "description": "Apoyo psicológico y prevención del suicidio"
+      },
+      "fiscalia": {
+        "number": "122",
+        "name": "Fiscalía General de la Nación",
+        "description": "Denuncias y atención a víctimas"
+      }
+    }
+  },
+  "resources_by_category": {
+    "violencia_domestica": {
+      "contacts": ["155", "123", "122"],
+      "info": "Puedes solicitar medidas de protección inmediatas en una Comisaría de Familia"
+    },
+    "acoso": {
+      "contacts": ["122", "155"],
+      "info": "El acoso está tipificado como delito. Puedes hacer denuncia en Fiscalía"
+    },
+    "salud_mental": {
+      "contacts": ["106"],
+      "info": "Tienes derecho a atención en salud mental por tu EPS"
+    },
+    "emergencia": {
+      "contacts": ["123"],
+      "info": "En caso de peligro inminente, llama al 123 inmediatamente"
+    },
+    "ayuda_social": {
+      "contacts": ["141"],
+      "info": "Existen múltiples programas de apoyo social disponibles"
+    }
+  }
+}

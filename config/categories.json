@@ -1,0 +1,55 @@
+{
+  "categories": {
+    "violencia_domestica": {
+      "name": "Violencia Doméstica",
+      "urgency": "high",
+      "keywords": [
+        "golpea", "maltrata", "violencia", "abuso", "hogar",
+        "esposo", "esposa", "pareja", "familia", "miedo",
+        "lesiones", "amenaza", "castigo", "pega"
+      ],
+      "description": "Situaciones de violencia física, psicológica o sexual en el entorno familiar"
+    },
+    "acoso": {
+      "name": "Acoso",
+      "urgency": "medium",
+      "keywords": [
+        "acoso", "hostigamiento", "persigue", "molesta",
+        "trabajo", "escuela", "compañeros", "jefe",
+        "intimidación", "bullying", "ciberacoso", "redes sociales"
+      ],
+      "description": "Acoso laboral, escolar, sexual o en línea"
+    },
+    "salud_mental": {
+      "name": "Salud Mental",
+      "urgency": "medium",
+      "keywords": [
+        "depresión", "ansiedad", "suicidio", "triste",
+        "angustia", "desesperado", "morir", "acabar",
+        "solo", "sin salida", "pánico", "miedo constante",
+        "no puedo más", "dolor emocional"
+      ],
+      "description": "Problemas de salud mental como depresión, ansiedad o pensamientos suicidas"
+    },
+    "emergencia": {
+      "name": "Emergencia de Seguridad",
+      "urgency": "critical",
+      "keywords": [
+        "emergencia", "peligro", "ahora", "ayuda urgente",
+        "me va a matar", "en este momento", "socorro",
+        "llamar policía", "secuestro", "amenaza de muerte"
+      ],
+      "description": "Situaciones que requieren intervención inmediata"
+    },
+    "ayuda_social": {
+      "name": "Ayuda Social/Psicológica",
+      "urgency": "low",
+      "keywords": [
+        "necesito hablar", "orientación", "consejo",
+        "no sé qué hacer", "apoyo", "ayuda psicológica",
+        "terapia", "asistencia social", "recursos"
+      ],
+      "description": "Necesidad de apoyo psicológico, social o información sobre recursos"
+    }
+  }
+}

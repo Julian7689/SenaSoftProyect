@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Chatbot de Apoyo{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar-container">
+                    <div class="logo">
+                        <!-- Added animated bot icon -->
+                        <div class="logo-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="10" rx="2"/>
+                                <circle cx="8" cy="15" r="1"/>
+                                <circle cx="16" cy="15" r="1"/>
+                                <path d="M9 7h6"/>
+                                <path d="M12 7v4"/>
+                            </svg>
+                        </div>
+                        <div class="logo-text">
+                            <h1>BOTI</h1>
+                            <span class="logo-subtitle">Tu asistente de apoyo</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Added icons to navigation links -->
+                    <ul class="nav-links">
+                        <li>
+                            <a href="/" class="nav-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                Chat
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/info" class="nav-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="16" x2="12" y2="12"/>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                </svg>
+                                Información
+                            </a>
+                        </li>
+                        <li id="adminNav" style="display:none;">
+                            <a href="/admin" class="nav-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z"/>
+                                    <path d="M2 22c0-4.418 3.582-8 8-8h4c4.418 0 8 3.582 8 8"/>
+                                </svg>
+                                Admin
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/login" class="nav-link">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 12l-4-4m0 8l4-4m4 4l4-4m-4 4l4 4"/>
+                                </svg>
+                            </a>
+                        </li>
+                    </ul>
+
+
+                    
+                    <!-- Added mobile menu toggle -->
+                    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Enhanced footer with better visual design -->
+    <footer>
+        <div class="container footer-container">
+            <div class="footer-content">
+                <div class="footer-emergency">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <div>
+                        <p class="footer-main-text">En caso de emergencia inmediata, llama al <strong>123</strong></p>
+                        <p class="footer-secondary-text">Este chatbot es una herramienta de apoyo y <strong>no reemplaza atención profesional</strong>.</p>
+                    </div>
+                </div>
+                
+                <div class="footer-disclaimer">
+                    <p class="small">Servicio de orientación y apoyo emocional disponible 24/7</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ux-enhancements.js') }}"></script>
+    <!-- Added mobile menu script -->
+    <script>
+        document.querySelector('.mobile-menu-toggle')?.addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Toggle Admin link based on provisional auth role
+        (function(){
+            const KEY = 'boti_auth';
+            function getAuth(){
+                try{
+                    const ls = localStorage.getItem(KEY);
+                    const ss = sessionStorage.getItem(KEY);
+                    const raw = ls || ss;
+                    return raw ? JSON.parse(raw) : null;
+                }catch{ return null; }
+            }
+            const auth = getAuth();
+            const adminItem = document.getElementById('adminNav');
+            if (auth?.role === 'admin' && adminItem) {
+                adminItem.style.display = '';
+            }
+        })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Página no encontrada{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="container error-container">
+        <div class="error-content">
+            <div class="error-illustration">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="80" fill="#f1f5f9" stroke="#6366f1" stroke-width="3"/>
+                    <text x="100" y="120" font-size="70" font-weight="bold" fill="#6366f1" text-anchor="middle">404</text>
+                </svg>
+            </div>
+            
+            <div class="error-text">
+                <h1>¡Ups! Página no encontrada</h1>
+                <p>Lo sentimos, la página que buscas parece haber desaparecido o nunca existió.</p>
+                <p class="error-suggestion">Pero no te preocupes, podemos ayudarte a encontrar lo que necesitas.</p>
+            </div>
+
+            <div class="error-actions">
+                <a href="/" class="btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    Volver al inicio
+                </a>
+                <a href="/info" class="btn-secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    Ver información
+                </a>
+            </div>
+
+            <div class="emergency-reminder">
+                <p><strong> ¿Necesitas ayuda inmediata?</strong></p>
+                <p>Llama al <strong>123</strong> para emergencias o al <strong>106</strong> para apoyo en salud mental</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+}
+
+.error-container {
+    max-width: 600px;
+    text-align: center;
+}
+
+.error-content {
+    background-color: var(--surface-color);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-illustration {
+    margin-bottom: 2rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.error-illustration svg {
+    width: 200px;
+    height: 200px;
+    filter: drop-shadow(0 10px 20px rgba(99, 102, 241, 0.2));
+}
+
+.error-text h1 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.error-text p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.error-suggestion {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+    background-color: var(--surface-color);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-3px);
+}
+
+.emergency-reminder {
+    margin-top: 2.5rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--danger-color);
+}
+
+.emergency-reminder p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.emergency-reminder p:first-child {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.emergency-reminder strong {
+    color: var(--danger-color);
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .error-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .error-text h1 {
+        font-size: 1.75rem;
+    }
+
+    .error-text p {
+        font-size: 1rem;
+    }
+
+    .error-illustration svg {
+        width: 150px;
+        height: 150px;
+    }
+
+    .error-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
