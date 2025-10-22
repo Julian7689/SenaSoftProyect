@@ -407,6 +407,415 @@
         width: 100%;
     }
 }
+
+/* ==================== ESTILOS ML PREDICTOR ==================== */
+
+.ml-prediction-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.ml-section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.ml-section-header h2 {
+    font-size: 1.75rem;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.ml-section-header p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.ml-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-group .tooltip-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: help;
+    position: relative;
+}
+
+.form-group .tooltip-icon:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: normal;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ml-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.ml-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.ml-input.input-error {
+    border-color: #ef4444;
+    background: #fee2e2;
+}
+
+.field-error {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+    font-weight: 500;
+}
+
+.ml-form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary-ml,
+.btn-secondary-ml {
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-ml {
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    color: white;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.btn-primary-ml:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+}
+
+.btn-primary-ml:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-primary-ml:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary-ml {
+    background: white;
+    color: #7c3aed;
+    border: 2px solid #7c3aed;
+}
+
+.btn-secondary-ml:hover {
+    background: #f3e8ff;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#prediction-result {
+    margin-top: 2rem;
+}
+
+.result-container {
+    padding: 2rem;
+    border-radius: 16px;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.result-container.prediction-no-access {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 2px solid #fca5a5;
+}
+
+.result-container.prediction-access {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    border: 2px solid #86efac;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.result-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.result-time {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.result-main {
+    margin-bottom: 1.5rem;
+}
+
+.prediction-value {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.prediction-value .label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.prediction-value .value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.result-interpretation {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.result-interpretation p {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.probability-bars {
+    margin: 1.5rem 0;
+}
+
+.prob-bar {
+    margin-bottom: 1rem;
+}
+
+.prob-bar > span {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.prob-bar .bar {
+    width: 100%;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.prob-bar .bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    border-radius: 12px;
+    transition: width 0.6s ease;
+}
+
+.result-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.alert {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    animation: slideInDown 0.3s ease-out;
+}
+
+.alert-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+}
+
+.alert-info {
+    background: #dbeafe;
+    border-left: 4px solid #2563eb;
+    color: #1e40af;
+}
+
+.alert-success {
+    background: #dcfce7;
+    border-left: 4px solid #16a34a;
+    color: #15803d;
+}
+
+.alert-warning {
+    background: #fef08a;
+    border-left: 4px solid #eab308;
+    color: #713f12;
+}
+
+.alert-error {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .ml-form {
+        grid-template-columns: 1fr;
+    }
+
+    .ml-form-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary-ml,
+    .btn-secondary-ml {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .prediction-value {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
 </style>
 
 <div class="admin-page">
@@ -496,6 +905,151 @@
             </div>
             <div id="alarms-list" class="list-container"></div>
         </div>
+
+        <!-- ==================== SECCIÓN ML PREDICTION ==================== -->
+        <div class="ml-prediction-section">
+            <div class="ml-section-header">
+                <h2>
+                    🤖 Predicción con Machine Learning
+                </h2>
+                <p>Analiza indicadores educativos para predecir acceso a internet</p>
+            </div>
+
+            <!-- Alertas container -->
+            <div id="alerts-container" style="margin-bottom: 1.5rem;"></div>
+
+            <!-- Formulario de predicción -->
+            <form class="ml-form" id="prediction-form">
+                <!-- Fila 1: Información básica -->
+                <div class="form-group">
+                    <label>
+                        Población Total
+                        <div class="tooltip-icon" data-tooltip="Número total de habitantes de la región">?</div>
+                    </label>
+                    <input type="number" id="input-poblacion_total" class="ml-input" placeholder="Ej: 16295" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Porcentaje Rural (%)
+                        <div class="tooltip-icon" data-tooltip="Porcentaje de población rural (0-100)">?</div>
+                    </label>
+                    <input type="number" id="input-porcentaje_rural" class="ml-input" placeholder="Ej: 8.66" min="0" max="100" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Estrato Promedio
+                        <div class="tooltip-icon" data-tooltip="Estrato socioeconómico (1-6)">?</div>
+                    </label>
+                    <input type="number" id="input-estrato_promedio" class="ml-input" placeholder="Ej: 2.54" min="1" max="6" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Tasa de Pobreza (%)
+                        <div class="tooltip-icon" data-tooltip="Porcentaje de población en pobreza (0-100)">?</div>
+                    </label>
+                    <input type="number" id="input-tasa_pobreza" class="ml-input" placeholder="Ej: 54.49" min="0" max="100" step="0.01" required>
+                </div>
+
+                <!-- Fila 2: Educación -->
+                <div class="form-group">
+                    <label>
+                        Número de Instituciones
+                        <div class="tooltip-icon" data-tooltip="Cantidad de instituciones educativas">?</div>
+                    </label>
+                    <input type="number" id="input-num_instituciones" class="ml-input" placeholder="Ej: 59" min="0" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Computadores por Estudiante
+                        <div class="tooltip-icon" data-tooltip="Ratio de computadores disponibles">?</div>
+                    </label>
+                    <input type="number" id="input-computadores_por_estudiante" class="ml-input" placeholder="Ej: 1.34" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Salones por Institución
+                        <div class="tooltip-icon" data-tooltip="Promedio de salones por institución">?</div>
+                    </label>
+                    <input type="number" id="input-salones_por_institucion" class="ml-input" placeholder="Ej: 24" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Docentes por Institución
+                        <div class="tooltip-icon" data-tooltip="Promedio de docentes por institución">?</div>
+                    </label>
+                    <input type="number" id="input-docentes_por_institucion" class="ml-input" placeholder="Ej: 78" min="0" step="0.01" required>
+                </div>
+
+                <!-- Fila 3: Conectividad -->
+                <div class="form-group">
+                    <label>
+                        Cobertura Eléctrica (%)
+                        <div class="tooltip-icon" data-tooltip="Porcentaje de cobertura eléctrica (0-100)">?</div>
+                    </label>
+                    <input type="number" id="input-cobertura_electrica" class="ml-input" placeholder="Ej: 89.94" min="0" max="100" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Cobertura 4G (%)
+                        <div class="tooltip-icon" data-tooltip="Porcentaje de cobertura 4G (0-100)">?</div>
+                    </label>
+                    <input type="number" id="input-cobertura_4g" class="ml-input" placeholder="Ej: 42.64" min="0" max="100" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Dispositivos por Hogar (Promedio)
+                        <div class="tooltip-icon" data-tooltip="Promedio de dispositivos electrónicos por hogar">?</div>
+                    </label>
+                    <input type="number" id="input-dispositivos_promedio_hogar" class="ml-input" placeholder="Ej: 1.96" min="0" step="0.01" required>
+                </div>
+
+                <!-- Fila 4: Desempeño -->
+                <div class="form-group">
+                    <label>
+                        Tasa de Aprobación (%)
+                        <div class="tooltip-icon" data-tooltip="Porcentaje de estudiantes que aprueban (0-100)">?</div>
+                    </label>
+                    <input type="number" id="input-tasa_aprobacion" class="ml-input" placeholder="Ej: 62.50" min="0" max="100" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Tasa de Deserción (%)
+                        <div class="tooltip-icon" data-tooltip="Porcentaje de estudiantes que desertan (0-100)">?</div>
+                    </label>
+                    <input type="number" id="input-tasa_desercion" class="ml-input" placeholder="Ej: 36.06" min="0" max="100" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Puntaje de Pruebas
+                        <div class="tooltip-icon" data-tooltip="Puntaje promedio en pruebas estandarizadas (0-500)">?</div>
+                    </label>
+                    <input type="number" id="input-puntaje_pruebas" class="ml-input" placeholder="Ej: 354.19" min="0" max="500" step="0.01" required>
+                </div>
+            </form>
+
+            <!-- Botones de acción -->
+            <div class="ml-form-actions">
+                <button type="button" id="predict-btn" class="btn-primary-ml">
+                    🚀 Hacer Predicción
+                </button>
+                <button type="button" id="example-btn" class="btn-secondary-ml">
+                    📋 Cargar Ejemplo
+                </button>
+            </div>
+
+            <!-- Resultado de la predicción -->
+            <div id="prediction-result"></div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -503,4 +1057,5 @@
 {% block scripts %}
 {{ super() }}
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ml-predictor.js') }}"></script>
 {% endblock %}

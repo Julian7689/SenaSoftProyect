@@ -3,39 +3,52 @@
  * Maneja la interacción del usuario con el chat
  */
 
-// Elementos del DOM
-const chatForm = document.getElementById('chatForm');
-const messageInput = document.getElementById('messageInput');
-const sendButton = document.getElementById('sendButton');
-const chatMessages = document.getElementById('chatMessages');
-const typingIndicator = document.getElementById('typingIndicator');
+// We'll query DOM inside DOMContentLoaded to avoid null refs
+let chatForm = null;
+let messageInput = null;
+let sendButton = null;
+let chatMessages = null;
+let typingIndicator = null;
 
 // ID de sesión único para el usuario
 let sessionId = generateSessionId();
 
 // ==================== INICIALIZACIÓN ====================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Chat inicializado');
-    messageInput.focus();
-    
-    // Event listener para el formulario
-    if (chatForm) {
-        chatForm.addEventListener('submit', handleSendMessage);
-    }
-    
-    // Auto-resize del textarea
-    messageInput.addEventListener('input', () => {
-        messageInput.style.height = 'auto';
-        messageInput.style.height = messageInput.scrollHeight + 'px';
-    });
-    
-    // Enviar con Ctrl+Enter
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.ctrlKey) {
-            e.preventDefault();
-            handleSendMessage(e);
+    try {
+        console.log('Chat inicializado');
+
+        chatForm = document.getElementById('chatForm');
+        messageInput = document.getElementById('messageInput');
+        sendButton = document.getElementById('sendButton');
+        chatMessages = document.getElementById('chatMessages');
+        typingIndicator = document.getElementById('typingIndicator');
+
+        if (messageInput) messageInput.focus();
+
+        // Event listener para el formulario
+        if (chatForm) {
+            chatForm.addEventListener('submit', handleSendMessage);
         }
-    });
+
+        // Auto-resize del textarea (guardado)
+        if (messageInput) {
+            messageInput.addEventListener('input', () => {
+                messageInput.style.height = 'auto';
+                messageInput.style.height = messageInput.scrollHeight + 'px';
+            });
+
+            // Enviar con Ctrl+Enter
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    handleSendMessage(e);
+                }
+            });
+        }
+    } catch (err) {
+        console.error('Error inicializando chat DOM:', err);
+    }
 });
 
 // ==================== FUNCIONES PRINCIPALES ====================
@@ -45,21 +58,25 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function handleSendMessage(e) {
     e.preventDefault();
-    
+    if (!messageInput) return;
+
     const message = messageInput.value.trim();
-    
     if (!message) return;
-    
+
     // Deshabilitar input mientras se procesa
     disableInput();
-    
-    // Agregar mensaje del usuario al chat
-    addMessageToChat(message, 'user');
-    
+
+    // Agregar mensaje del usuario al chat (localmente) y en consola para debug
+    try {
+        addMessageToChat(message, 'user');
+    } catch (err) {
+        console.error('Error agregando mensaje localmente:', err);
+    }
+
     // Limpiar input
     messageInput.value = '';
     messageInput.style.height = 'auto';
-    
+
     // Mostrar indicador de escritura
     showTypingIndicator();
     
@@ -88,7 +105,7 @@ async function handleSendMessage(e) {
         );
     } finally {
         enableInput();
-        messageInput.focus();
+        if (messageInput) messageInput.focus();
     }
 }
 
@@ -118,6 +135,15 @@ async function sendMessageToAPI(message) {
  * Agregar mensaje al chat con animaciones mejoradas
  */
 function addMessageToChat(text, sender, data = null) {
+    // Validar que chatMessages exista
+    if (!chatMessages) {
+        chatMessages = document.getElementById('chatMessages');
+        if (!chatMessages) {
+            console.warn('chatMessages no encontrado, mensaje no se añadirá al DOM');
+            return;
+        }
+    }
+
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}-message`;
     messageDiv.style.opacity = '0';

@@ -1,0 +1,40 @@
+{
+  "created_at": "2025-10-22T12:40:31.126537",
+  "dataset_path": "C:\\Users\\AdminSena\\Desktop\\PROYECTO SIUUU\\data\\processed\\education_dataset_plus_noleak.csv",
+  "target": "acceso_a_internet",
+  "metrics": {
+    "accuracy": 0.887,
+    "f1": 0.7871939736346516,
+    "roc_auc": 0.9531395199589269
+  },
+  "features_num": [
+    "cobertura_electrica",
+    "computadores_por_estudiante",
+    "dispositivos_promedio_hogar",
+    "docentes_por_institucion",
+    "estrato_promedio",
+    "num_instituciones",
+    "poblacion_total",
+    "porcentaje_rural",
+    "puntaje_pruebas",
+    "salones_por_institucion",
+    "tasa_aprobacion",
+    "tasa_desercion",
+    "tasa_pobreza",
+    "comp_per_inst_ratio",
+    "docente_salon_ratio",
+    "pob_por_inst",
+    "aprob_deserc_ratio"
+  ],
+  "features_cat": [],
+  "best_params": {
+    "clf__activation": "tanh",
+    "clf__alpha": 0.01,
+    "clf__hidden_layer_sizes": [
+      100,
+      50
+    ],
+    "clf__learning_rate_init": 0.001,
+    "clf__solver": "lbfgs"
+  }
+}

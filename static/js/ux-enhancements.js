@@ -59,7 +59,7 @@
         setTimeout(() => ripple.remove(), 600);
     }
     
-    // Agregar ripple a botones principales
+
     document.querySelectorAll('.btn-primary, .btn-auth, .btn-primary-enhanced, .refresh-btn').forEach(btn => {
         // Solo agregar si no tiene ya el listener
         if (!btn.dataset.rippleAdded) {
