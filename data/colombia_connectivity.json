@@ -1,0 +1,204 @@
+{
+  "colombia_connectivity": {
+    "metadata": {
+      "last_update": "2024-10-23",
+      "source": "MinTIC Colombia",
+      "coverage_scale": "1-5 (1=Muy baja, 5=Excelente)"
+    },
+    "departments": {
+      "antioquia": {
+        "name": "Antioquia",
+        "capital": "Medellín",
+        "internet_coverage": 4,
+        "main_providers": ["Claro", "Movistar", "Tigo UNE"],
+        "problematic_areas": [
+          "Urabá", "Bajo Cauca", "Nordeste", "Suroeste rural"
+        ],
+        "municipalities_low_coverage": [
+          "Vigía del Fuerte", "Murindó", "Frontino", "Dabeiba",
+          "Peque", "Ituango", "Briceño", "Valdivia"
+        ],
+        "connectivity_programs": [
+          "Puntos Vive Digital", "Kioscos Vive Digital", "Conexión Total"
+        ],
+        "estimated_households_without_internet": 280000
+      },
+      "choco": {
+        "name": "Chocó",
+        "capital": "Quibdó",
+        "internet_coverage": 1,
+        "main_providers": ["Claro", "Movistar"],
+        "problematic_areas": [
+          "Pacífico Norte", "Pacífico Sur", "Atrato", "San Juan"
+        ],
+        "municipalities_low_coverage": [
+          "Bagadó", "Bahía Solano", "Bojayá", "Carmen del Darién",
+          "Condoto", "El Cantón de San Pablo", "Istmina", "Juradó",
+          "Lloró", "Medio Atrato", "Medio Baudó", "Medio San Juan",
+          "Nóvita", "Nuquí", "Río Iró", "Río Quito", "Riosucio",
+          "San José del Palmar", "Sipí", "Tadó", "Unguía", "Unión Panamericana"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Internet para Todos"
+        ],
+        "estimated_households_without_internet": 180000
+      },
+      "guainia": {
+        "name": "Guainía",
+        "capital": "Inírida",
+        "internet_coverage": 1,
+        "main_providers": ["Claro"],
+        "problematic_areas": [
+          "Toda la región amazónica", "Fronteras con Venezuela y Brasil"
+        ],
+        "municipalities_low_coverage": [
+          "Barranco Minas", "Cacahual", "La Guadalupe", "Morichal",
+          "Pana Pana", "Puerto Colombia", "San Felipe"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Red Nacional Académica Avanzada"
+        ],
+        "estimated_households_without_internet": 12000
+      },
+      "guaviare": {
+        "name": "Guaviare",
+        "capital": "San José del Guaviare",
+        "internet_coverage": 2,
+        "main_providers": ["Claro", "Movistar"],
+        "problematic_areas": [
+          "Zona rural amazónica", "Área de reserva natural"
+        ],
+        "municipalities_low_coverage": [
+          "Calamar", "El Retorno", "Miraflores"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Puntos Vive Digital Rural"
+        ],
+        "estimated_households_without_internet": 28000
+      },
+      "vaupes": {
+        "name": "Vaupés",
+        "capital": "Mitú",
+        "internet_coverage": 1,
+        "main_providers": ["Claro"],
+        "problematic_areas": [
+          "Toda la región amazónica", "Comunidades indígenas aisladas"
+        ],
+        "municipalities_low_coverage": [
+          "Carurú", "Pacoa", "Papunahua", "Yavaraté"
+        ],
+        "connectivity_programs": [
+          "Internet para Todos", "Red Satelital Amazónica"
+        ],
+        "estimated_households_without_internet": 8000
+      },
+      "amazonas": {
+        "name": "Amazonas",
+        "capital": "Leticia",
+        "internet_coverage": 2,
+        "main_providers": ["Claro", "Movistar"],
+        "problematic_areas": [
+          "Región amazónica", "Fronteras trinacionales", "Río Amazonas"
+        ],
+        "municipalities_low_coverage": [
+          "El Encanto", "La Chorrera", "La Pedrera", "La Victoria",
+          "Miriti-Paraná", "Puerto Alegría", "Puerto Arica",
+          "Puerto Nariño", "Puerto Santander", "Tarapacá"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Red Satelital Amazónica"
+        ],
+        "estimated_households_without_internet": 22000
+      },
+      "la_guajira": {
+        "name": "La Guajira",
+        "capital": "Riohacha",
+        "internet_coverage": 2,
+        "main_providers": ["Claro", "Movistar", "Tigo"],
+        "problematic_areas": [
+          "Alta Guajira", "Zona desértica", "Comunidades wayuu dispersas"
+        ],
+        "municipalities_low_coverage": [
+          "Albania", "Barrancas", "Dibulla", "Distracción",
+          "El Molino", "Fonseca", "Hatonuevo", "La Jagua del Pilar",
+          "Maicao", "Manaure", "San Juan del Cesar", "Uribia", "Urumita", "Villanueva"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Puntos Vive Digital Wayuu"
+        ],
+        "estimated_households_without_internet": 95000
+      },
+      "magdalena": {
+        "name": "Magdalena",
+        "capital": "Santa Marta",
+        "internet_coverage": 3,
+        "main_providers": ["Claro", "Movistar", "Tigo UNE"],
+        "problematic_areas": [
+          "Sierra Nevada", "Zona bananera rural", "Ciénaga Grande"
+        ],
+        "municipalities_low_coverage": [
+          "Algarrobo", "Aracataca", "Cerro San Antonio", "Chibolo",
+          "Ciénaga", "Concordia", "El Banco", "El Piñón", "El Retén",
+          "Fundación", "Guamal", "Nueva Granada", "Pedraza", "Pijiño del Carmen",
+          "Pivijay", "Plato", "Puebloviejo", "Remolino", "Sabanas de San Ángel",
+          "Salamina", "San Sebastián de Buenavista", "San Zenón", "Santa Ana",
+          "Santa Bárbara de Pinto", "Sitionuevo", "Tenerife", "Zapayán", "Zona Bananera"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Puntos Vive Digital"
+        ],
+        "estimated_households_without_internet": 145000
+      },
+      "cundinamarca": {
+        "name": "Cundinamarca",
+        "capital": "Bogotá",
+        "internet_coverage": 4,
+        "main_providers": ["Claro", "Movistar", "Tigo UNE", "ETB"],
+        "problematic_areas": [
+          "Municipios rurales alejados", "Cordillera Oriental"
+        ],
+        "municipalities_low_coverage": [
+          "Medina", "Paratebueno", "Guayabetal", "Ubaque",
+          "Gutiérrez", "Tibacuy", "Venecia", "Puli"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Red de Alta Velocidad", "Puntos Vive Digital"
+        ],
+        "estimated_households_without_internet": 125000
+      },
+      "bolivar": {
+        "name": "Bolívar",
+        "capital": "Cartagena",
+        "internet_coverage": 3,
+        "main_providers": ["Claro", "Movistar", "Tigo UNE"],
+        "problematic_areas": [
+          "Montes de María", "Depresión Momposina", "Sur de Bolívar"
+        ],
+        "municipalities_low_coverage": [
+          "Achí", "Altos del Rosario", "Arenal", "Arjona", "Arroyohondo",
+          "Barranco de Loba", "Calamar", "Cantagallo", "Cicuco", "Córdoba",
+          "Clemencia", "El Carmen de Bolívar", "El Guamo", "El Peñón",
+          "Hatillo de Loba", "Magangué", "Mahates", "Margarita", "María la Baja",
+          "Mompós", "Montecristo", "Morales", "Norosí", "Pinillos", "Regidor",
+          "Río Viejo", "San Cristóbal", "San Estanislao", "San Fernando",
+          "San Jacinto", "San Jacinto del Cauca", "San Juan Nepomuceno",
+          "San Martín de Loba", "San Pablo", "Santa Catalina", "Santa Rosa",
+          "Santa Rosa del Sur", "Simití", "Soplaviento", "Talaigua Nuevo",
+          "Tiquisio", "Turbaco", "Turbaná", "Villanueva", "Zambrano"
+        ],
+        "connectivity_programs": [
+          "Conexión Total", "Puntos Vive Digital"
+        ],
+        "estimated_households_without_internet": 195000
+      }
+    },
+    "coverage_summary": {
+      "departments_very_low_coverage": ["Chocó", "Guainía", "Vaupés"],
+      "departments_low_coverage": ["Amazonas", "Guaviare", "La Guajira"],
+      "departments_medium_coverage": ["Magdalena", "Bolívar"],
+      "departments_good_coverage": ["Cundinamarca", "Antioquia"],
+      "total_households_without_internet": 1090000,
+      "percentage_without_coverage": 18.5
+    }
+  }
+}

@@ -1,12 +1,13 @@
 """
 Enhanced Chatbot Orchestrator
-Integra: Modelos generativos + ML + Case Manager
+Integra: Modelos generativos + ML + Case Manager + Preguntas Inteligentes
 """
 
 from src.chatbot.case_manager import (
     CaseManager, UrgencyLevel, ProblemType, AvailableSolution, Case
 )
 from src.chatbot.chatbot_orchestrator import ChatbotOrchestrator
+from src.chatbot.intelligent_questions import IntelligentQuestionGenerator
 from typing import Dict, List, Optional
 import logging
 
@@ -23,7 +24,7 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
     def __init__(self, ml_model=None, vae_encoder=None, vae_decoder=None,
                  vae_scaler=None, vae_features=None, user_id='default'):
         """
-        Inicializa con tus modelos existentes + Case Manager
+        Inicializa con tus modelos existentes + Case Manager + Sistema Inteligente
         """
         # Inicializar clase padre (con tus modelos)
         super().__init__(
@@ -38,7 +39,10 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
         # NUEVO: Case Manager para gestión de casos sociales
         self.case_manager = CaseManager()
         
-        logger.info("✅ EnhancedChatbotOrchestrator inicializado")
+        # NUEVO: Generador de preguntas inteligentes con memoria conversacional
+        self.question_generator = IntelligentQuestionGenerator()
+        
+        logger.info("✅ EnhancedChatbotOrchestrator inicializado con sistema inteligente")
     
     def process_message_with_case_management(self, user_message: str,
                                             conversation_history: List[Dict]) -> Dict:
@@ -77,6 +81,31 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
         logger.info(f"   └─ Urgencia: {problem_analysis.urgency.value}")
         logger.info(f"   └─ Impacto: {problem_analysis.impact_score:.0f}/100")
         
+        # =============== FASE 2.5: ANÁLISIS INTELIGENTE DE REGIÓN ===============
+        
+        # 2.5.1 Detectar si pregunta sobre regiones colombianas sin internet
+        regional_context = None
+        intelligent_questions = []
+        
+        if any(keyword in user_message.lower() for keyword in 
+               ['region', 'departamento', 'cobertura', 'internet', 'conectividad', 'colombia']):
+            logger.info("🌍 Detectada pregunta sobre conectividad regional")
+            
+            # Obtener contexto regional específico
+            regional_context = self.question_generator.get_regional_context(user_message)
+            
+            # Generar preguntas inteligentes basadas en el mensaje y contexto regional
+            intelligent_questions = self.question_generator.generate_contextual_questions(
+                user_message=user_message,
+                user_id=self.user_id,
+                conversation_history=conversation_history,
+                regional_context=regional_context
+            )
+            
+            logger.info(f"✨ Generadas {len(intelligent_questions)} preguntas inteligentes")
+            if regional_context:
+                logger.info(f"📍 Contexto regional: {regional_context.get('department_name', 'N/A')}")
+        
         # =============== FASE 3: GESTIÓN DE CASO (si es necesario) ===============
         
         case_id = None
@@ -104,13 +133,15 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
             
             if solutions:
                 # =============== FASE 4: SÍNTESIS INTELIGENTE ===============
-                # Combinar respuesta generativa + oferta de solución
+                # Combinar respuesta generativa + oferta de solución + contexto regional
                 
                 enhanced_response = self._synthesize_response(
                     base_response=base_response,
                     problem=problem_analysis,
                     solutions=solutions,
-                    case=case
+                    case=case,
+                    regional_context=regional_context,
+                    intelligent_questions=intelligent_questions
                 )
                 
                 generated_by = 'case_manager'
@@ -136,6 +167,8 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
                     'requires_action': True,
                     'action_type': action_type,
                     'generated_by': generated_by,
+                    'regional_context': regional_context,
+                    'intelligent_questions': intelligent_questions,
                     'metadata': {
                         'affected_people': problem_analysis.affected_people,
                         'keywords': problem_analysis.keywords
@@ -143,6 +176,30 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
                 }
         
         # =============== FLUJO NORMAL (sin problema detectado) ===============
+        
+        # Pero SI hay contexto regional o preguntas inteligentes, enriquecer respuesta
+        if regional_context or intelligent_questions:
+            enhanced_normal_response = self._enrich_response_with_intelligence(
+                base_response=base_response,
+                regional_context=regional_context,
+                intelligent_questions=intelligent_questions
+            )
+            
+            return {
+                'response': enhanced_normal_response,
+                'intent': intent,
+                'confidence': confidence,
+                'case_id': None,
+                'requires_action': False,
+                'action_type': None,
+                'generated_by': 'intelligent_system',
+                'regional_context': regional_context,
+                'intelligent_questions': intelligent_questions,
+                'metadata': {
+                    'problem_type': problem_analysis.primary_problem.value,
+                    'urgency': problem_analysis.urgency.value
+                }
+            }
         
         return {
             'response': base_response,
@@ -160,7 +217,8 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
     
     def _synthesize_response(self, base_response: str,
                             problem, solutions: List[AvailableSolution],
-                            case: Case) -> str:
+                            case: Case, regional_context: Optional[Dict] = None,
+                            intelligent_questions: Optional[List[str]] = None) -> str:
         """
         SÍNTESIS INTELIGENTE:
         Combina la respuesta empática del modelo generativo
@@ -172,6 +230,7 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
         # Construir respuesta sintetizada
         solution_type = best_solution.type.value.replace('_', ' ')
         
+        # Construir respuesta base con solución
         synthesized = f"""{base_response}
 
 ---
@@ -185,17 +244,89 @@ He encontrado una opción de {solution_type} disponible en tu zona, completament
 ⏱️ Duración: {best_solution.duration_months} meses
 💰 Costo para ti: **GRATIS** (100% patrocinado)
 📊 Coincidencia con tu necesidad: {int(best_solution.match_score * 100)}%
-📦 Cupos disponibles: {best_solution.capacity_remaining}
+📦 Cupos disponibles: {best_solution.capacity_remaining}"""
 
-¿Te interesa que te ayude a activarlo? Necesitaré algunos datos básicos para verificar tu elegibilidad.
+        # Agregar contexto regional si está disponible
+        if regional_context:
+            dept_name = regional_context.get('department_name', 'tu región')
+            coverage_level = regional_context.get('coverage_level', 'N/A')
+            
+            synthesized += f"""
+
+🌍 **Información regional - {dept_name}:**
+📶 Nivel de cobertura actual: {coverage_level}/5
+🏘️ Municipios más afectados: {', '.join(regional_context.get('problematic_areas', [])[:3])}
+🏠 Hogares sin conectividad: {regional_context.get('households_without_connectivity', 'N/A'):,}
+🎯 Programas activos en la región: {len(regional_context.get('active_programs', []))}"""
+
+        # Agregar preguntas inteligentes
+        if intelligent_questions:
+            synthesized += f"""
+
+🤔 **Basándome en tu situación, me gustaría saber:**"""
+            for i, question in enumerate(intelligent_questions[:3], 1):
+                synthesized += f"\n{i}. {question}"
+
+        # Finalizar con call-to-action
+        synthesized += f"""
 
 💡 **Mientras tanto, opciones inmediatas:**
 📍 Biblioteca local - WiFi gratis de 8am-6pm
 🖥️ Centro digital comunitario - Computadores disponibles
 
-¿Quieres continuar con la activación?"""
+¿Te interesa que te ayude a activar esta solución?"""
         
         return synthesized
+    
+    def _enrich_response_with_intelligence(self, base_response: str, 
+                                         regional_context: Optional[Dict] = None,
+                                         intelligent_questions: Optional[List[str]] = None) -> str:
+        """
+        Enriquece respuesta normal con contexto regional e inteligencia conversacional
+        """
+        enriched_response = base_response
+        
+        # Agregar contexto regional colombiano
+        if regional_context:
+            dept_name = regional_context.get('department_name', 'esta región')
+            coverage_level = regional_context.get('coverage_level', 0)
+            
+            # Información específica según nivel de cobertura
+            if coverage_level <= 2:
+                coverage_desc = "⚠️ **Cobertura BAJA** - Zona prioritaria para intervención"
+            elif coverage_level <= 3:
+                coverage_desc = "⚡ **Cobertura MEDIA** - En proceso de mejora"
+            else:
+                coverage_desc = "✅ **Cobertura BUENA** - Servicios disponibles"
+            
+            enriched_response += f"""
+
+---
+
+🌍 **Información sobre conectividad en {dept_name}:**
+
+{coverage_desc}
+📊 Nivel actual: {coverage_level}/5
+🏘️ Municipios con mayor necesidad: {', '.join(regional_context.get('problematic_areas', [])[:3])}
+🏠 Hogares sin internet: {regional_context.get('households_without_connectivity', 'N/A'):,}
+📡 Proveedores activos: {', '.join(regional_context.get('providers', []))}
+
+💡 **Programas gubernamentales disponibles:**"""
+            
+            for program in regional_context.get('active_programs', [])[:2]:
+                enriched_response += f"\n• {program}"
+        
+        # Agregar preguntas inteligentes para profundizar
+        if intelligent_questions:
+            enriched_response += f"""
+
+🤔 **Para ayudarte mejor, me gustaría conocer:**"""
+            for i, question in enumerate(intelligent_questions[:3], 1):
+                enriched_response += f"\n{i}. {question}"
+            
+            enriched_response += "\n\n💬 Responde cualquiera de estas preguntas para que pueda darte información más específica."
+        
+        return enriched_response
     
     def activate_case_solution(self, case_id: str,
                               user_data: Dict,
