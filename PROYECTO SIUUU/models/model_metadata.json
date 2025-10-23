@@ -1,0 +1,45 @@
+{
+  "training_date": "2025-10-22 17:31:26.485447",
+  "model_type": "MLPClassifier",
+  "architecture": "(128, 64, 32)",
+  "total_records": 15,
+  "train_records": 12,
+  "test_records": 3,
+  "features": [
+    "poblacion_total",
+    "porcentaje_rural",
+    "estrato_promedio",
+    "tasa_pobreza",
+    "num_instituciones",
+    "computadores_por_estudiante",
+    "salones_por_institucion",
+    "docentes_por_institucion",
+    "cobertura_electrica",
+    "cobertura_4g",
+    "dispositivos_promedio_hogar",
+    "tasa_aprobacion",
+    "tasa_desercion",
+    "puntaje_pruebas"
+  ],
+  "target": "tiene_internet",
+  "metrics": {
+    "train": {
+      "accuracy": 0.8333333333333334,
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1": 0.8
+    },
+    "test": {
+      "accuracy": 0.6666666666666666,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "confusion_matrix": {
+    "tn": 2,
+    "fp": 0,
+    "fn": 1,
+    "tp": 0
+  }
+}

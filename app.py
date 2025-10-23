@@ -9,7 +9,7 @@ if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -25,6 +25,10 @@ load_dotenv()
 
 # Importar módulos propios
 from src.chatbot.chatbot_orchestrator import ChatbotOrchestrator
+from src.auth.mock_auth import MockAuthService
+from src.conversation.mock_store import MockConversationStore
+from src.api.routes_mock import auth_bp, chat_bp, admin_bp
+
 try:
     import tensorflow as tf
     TENSORFLOW_AVAILABLE = True
@@ -56,6 +60,10 @@ logger = logging.getLogger(__name__)
 ML_MODEL = None
 MODEL_FEATURES = None
 MODEL_LOADED = False
+
+# ==================== INICIALIZAR SERVICIOS MOCK ====================
+auth_service = MockAuthService()
+conversation_store = MockConversationStore()
 
 # ==================== ORQUESTADOR CONVERSACIONAL ====================
 # Componente híbrido: NLP + Predicción + Generación
@@ -147,21 +155,33 @@ def load_orchestrator():
 
 @app.route('/')
 def index():
-    """Página principal del chat"""
-    return render_template('chat_simple.html')
+    """Redirigir a login si no hay sesión"""
+    return redirect('/auth/login')
+
+@app.route('/auth/login')
+def login():
+    """Página de login de usuarios"""
+    return render_template('auth/login.html')
+
+@app.route('/user/consent')
+def consent():
+    """Página de consentimiento LSRPD (obligatorio antes del chat)"""
+    return render_template('user/consent.html')
+
+@app.route('/user/chat')
+def user_chat():
+    """Página de chat para usuarios"""
+    return render_template('user/chat.html')
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    """Panel de administración para admins"""
+    return render_template('admin/dashboard.html')
 
 @app.route('/info')
 def info():
     """Página de información sobre recursos"""
     return render_template('info.html')
-@app.route('/login')
-def login():
-    """Página de login de usuarios"""
-    return render_template('login.html')
-@app.route('/admin')
-def admin_dashboard():
-    """Panel de administración (provisional, protegido en cliente)"""
-    return render_template('admin.html')
 # ==================== API ENDPOINTS ====================
 # ==================== API ENDPOINTS ====================
 
@@ -607,6 +627,11 @@ def internal_error(error):
 # ==================== EJECUCIÓN ====================
 
 if __name__ == '__main__':
+    # Registrar blueprints de las rutas mock (auth, chat, admin)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(chat_bp)
+    app.register_blueprint(admin_bp)
+    
     # Crear directorio de logs si no existe
     os.makedirs('logs', exist_ok=True)
     

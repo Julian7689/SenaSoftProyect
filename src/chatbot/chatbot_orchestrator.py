@@ -17,6 +17,9 @@ from typing import Dict, List, Tuple, Optional
 import numpy as np
 from abc import ABC, abstractmethod
 
+# Importar ConversationMemory
+from .conversation_memory import ConversationMemory
+
 logger = logging.getLogger(__name__)
 
 
@@ -152,38 +155,74 @@ class EntityExtractor:
 
 
 class ResponseGenerator:
-    """Genera respuestas coherentes y contextualizadas"""
+    """Genera respuestas coherentes y contextualizadas AVANZADAS con memoria de conversación"""
     
     def __init__(self):
-        self.templates = self._load_templates()
+        """Inicializa con plantillas específicas por intención"""
+        self.conversation_memory: Optional[ConversationMemory] = None
+        self.response_templates = self._load_response_templates()
+        logger.info("ResponseGenerator AVANZADO inicializado")
     
-    def _load_templates(self) -> Dict:
-        """Carga plantillas de respuesta"""
+    def set_conversation_memory(self, memory: ConversationMemory):
+        """Asigna memoria de conversación para acceso al contexto"""
+        self.conversation_memory = memory
+    
+    def _load_response_templates(self) -> Dict:
+        """Carga plantillas de respuesta muy específicas y naturales"""
         return {
-            'saludar': [
-                "🤖 ¡Hola! Soy BOTI, tu asistente educativo. Analizo conectividad e indicadores educativos. ¿Cómo puedo ayudarte?",
-                "👋 ¡Hola! Me alegra verte. Puedo ayudarte a analizar conectividad, predecir acceso a internet, o sugerir mejoras. ¿Qué necesitas?",
-                "🎓 ¡Hola! Soy BOTI. ¿Hay algo sobre educación o conectividad que necesites?"
+            'initial_greeting': [
+                "Hola! Soy BOTI, tu asistente especializado. Puedo analizar conectividad, educación e indicadores de tu región. ¿Cuál es tu región?",
+                "¡Bienvenido! Soy BOTI. Puedo ayudarte a analizar la situación educativa y de conectividad en tu zona. ¿De dónde eres?",
+                "Hola! Estoy aquí para ayudarte. Cuéntame de qué región eres y qué necesitas analizar.",
             ],
-            'ayuda_inicio': [
-                "Claro, estoy para ayudarte. Cuéntame sobre tu región o el problema que enfrentas.",
-                "¡Por supuesto! Soy experto en análisis educativo. ¿Cuál es tu región o cuál es tu preocupación principal?"
+            'confirm_region': [
+                "Perfecto, recordaré que eres de {region}.",
+                "Listo, trabajaremos con datos de {region}.",
+                "Anotado: {region}. Vamos adelante.",
             ],
-            'necesito_datos': [
-                "Para análisis completo, necesitaré 14 indicadores: población, porcentaje rural, estrato, tasa de pobreza, instituciones, computadores/estudiante, salones/institución, docentes/institución, cobertura eléctrica, 4G, dispositivos/hogar, tasa de aprobación, deserción y puntaje en pruebas.",
-                "Para hacer un diagnóstico preciso, necesito estos datos: población total, % rural, estrato promedio, tasa de pobreza, número de instituciones educativas, equipamiento tecnológico, y métricas de desempeño."
+            'connectivity_help': [
+                "Entiendo, necesitas ayuda con conectividad en {region}. ¿Cuál es la situación actual? ¿Tienes acceso a internet o es limitado?",
+                "La conectividad es crucial para educación. En {region}, ¿cuáles son los principales problemas que observas?",
+                "Perfecto. Vamos a analizar la conectividad en {region}. Cuéntame más sobre la cobertura actual.",
             ],
-            'prediccion_exito': [
-                "✅ ¡Excelentes noticias! Tu región parece tener buena infraestructura de conectividad. Sin embargo, siempre hay espacio para mejorar. ¿Quieres ver sugerencias?",
-                "🎉 ¡Muy bien! Tu análisis indica acceso a internet con buena cobertura. ¿Te gustaría explorar cómo mejorar aún más?"
+            'education_help': [
+                "Excelente. En {region}, ¿qué aspecto educativo te preocupa más: acceso, calidad, infraestructura escolar?",
+                "Enfoquémonos en educación en {region}. ¿Cuáles son los principales desafíos que observas?",
+                "Claro. La educación es fundamental. En {region}, ¿qué necesitas mejorar?",
             ],
-            'prediccion_alerta': [
-                "⚠️ Mi análisis muestra que tu región enfrenta desafíos de conectividad. Es importante actuar. ¿Quieres que sugiera mejoras específicas?",
-                "🔴 He detectado que hay oportunidades de mejora en conectividad. Te recomiendo enfocarse en infraestructura. ¿Ves las propuestas abajo?"
+            'improvement_proposal': [
+                "Para proponer mejoras en {region}, necesito entender mejor la situación. ¿Cuáles son los indicadores principales (población, cobertura 4G, cantidad de instituciones)?",
+                "Vamos a generar mejoras para {region}. Comparte los datos clave de tu región.",
+                "Perfecto. Para {region} puedo sugerir mejoras. ¿Tienes datos sobre población, cobertura de internet, instituciones educativas?",
             ],
-            'despedida': [
-                "👋 ¡Hasta luego! Si necesitas más análisis, no dudes en volver. ¡Estoy aquí para ayudarte!",
-                "🚀 ¡Adiós! Espero haber sido útil. ¡Cualquier cosa, me encuentras aquí!"
+            'data_needed': [
+                "Para hacer un análisis completo de {region}, necesito 14 indicadores: población, % rural, estrato, pobreza, instituciones educativas, computadores/estudiante, salones/institución, docentes/institución, cobertura eléctrica, cobertura 4G, dispositivos/hogar, tasa aprobación, deserción, puntaje pruebas. ¿Los tienes?",
+                "Para {region}, necesito datos sobre: población, cobertura 4G, instituciones educativas, acceso a dispositivos, tasas de aprobación. ¿Puedes compartirlos?",
+            ],
+            'analysis_ready': [
+                "Perfecto. Con la información de {region}, puedo hacer un análisis detallado. Dime qué necesitas: ¿una predicción de acceso a internet, mejoras recomendadas, o un reporte completo?",
+                "Listo para analizar {region}. ¿Quieres que prediga acceso a internet, genere propuestas de mejora, o haga un reporte?",
+            ],
+            'problem_identified': [
+                "Veo que en {region} el problema principal es {problem}. Vamos a enfocarnos en eso.",
+                "Entiendo. El desafío en {region} es {problem}. Trabajemos en soluciones.",
+            ],
+            'continuation': [
+                "Retomando: en {region} tu problema es {problem}. ¿Quieres que continúe analizando?",
+                "Recuerda que en {region} mencionaste {problem}. ¿Qué más necesitas?",
+            ],
+            'multiple_topics': [
+                "Veo que te interesa tanto conectividad como educación en {region}. Son temas relacionados. ¿Cuál es tu prioridad?",
+                "Interesante: conectividad Y educación en {region}. Ambas cosas están ligadas. ¿Comenzamos por la conectividad?",
+            ],
+            'clarification': [
+                "Para {region}, necesito clarificar: ¿tu principal preocupación es {topic}? Así puedo ser más específico.",
+                "¿Puedes confirmar? En {region}, ¿tu necesidad es realmente {topic}? Quiero ayudarte bien.",
+            ],
+            'closing': [
+                "¿Hay algo más que analizar de {region}?",
+                "¿Necesitas algo más para {region}?",
+                "Listo con {region}. ¿Hay otro tema?",
             ]
         }
     
@@ -191,111 +230,199 @@ class ResponseGenerator:
         self,
         intent: str,
         entities: Dict,
+        memory: Optional[ConversationMemory] = None,
         prediction_result: Optional[Dict] = None,
         user_region: Optional[str] = None
-    ) -> str:
-        """Genera respuesta contextualizada"""
+    ) -> Tuple[str, bool, Optional[str]]:
+        """
+        Genera respuesta inteligente basada en contexto
+        
+        Retorna:
+        - response: Texto de respuesta
+        - is_question: Si es una pregunta del bot
+        - question_topic: Sobre qué pregunta (si aplica)
+        """
+        
+        if memory:
+            self.conversation_memory = memory
+        
+        # Obtener contexto
+        region = entities.get('region') or user_region
+        keywords = set(entities.get('keywords', []))
+        
+        context = self.conversation_memory.get_context_summary() if self.conversation_memory else {}
+        
+        # Respuestas basadas en intención Y contexto
         
         if intent == 'saludar':
-            return np.random.choice(self.templates['saludar'])
+            response = self._generate_greeting_response(region, context)
+            return response, False, None
         
         elif intent == 'despedida':
-            return np.random.choice(self.templates['despedida'])
+            return "¡Hasta luego! Si necesitas más ayuda, vuelve pronto.", False, None
         
         elif intent == 'ayuda':
-            if entities['region']:
-                return f"Entiendo que buscas ayuda en {entities['region']}. " \
-                       f"Para hacerte un análisis completo, necesito información específica. " \
-                       f"¿Puedes compartir datos sobre tu región?"
-            else:
-                response = np.random.choice(self.templates['ayuda_inicio'])
-                return response
+            response, is_q, topic = self._generate_help_response(region, keywords, context)
+            return response, is_q, topic
         
         elif intent == 'conectividad':
-            if entities['region']:
-                return f"Veo que te interesa conectividad en {entities['region']}. " \
-                       f"Este es un factor crucial para la educación. " \
-                       f"¿Cuál es la situación específica que enfrentas?"
-            else:
-                return "Veo que te interesa el tema de conectividad. " \
-                       "Es un factor crucial para educación. " \
-                       "¿Cuál es tu región o situación específica?"
-        
-        elif intent == 'prediccion':
-            if prediction_result and prediction_result.get('executed'):
-                return self._generate_prediction_response(prediction_result)
-            else:
-                if entities['region']:
-                    return f"Para hacer una predicción en {entities['region']}, necesito 14 indicadores específicos. " \
-                           f"¿Los tienes disponibles?"
-                else:
-                    return "Para hacer una predicción, necesito datos específicos de tu región. " \
-                           "¿Los tienes disponibles?"
-        
-        elif intent == 'mejora':
-            if prediction_result and prediction_result.get('improvements'):
-                return "Perfecto! He generado propuestas de mejora basadas en tu situación. " \
-                       "Ver detalles abajo. 👇"
-            else:
-                return "Para sugerir mejoras, primero necesito analizar tu situación. " \
-                       "¿Compartimos datos?"
-        
-        elif intent == 'reporte':
-            return "Claro! Puedo generar reportes con análisis y gráficas. " \
-                   "Primero, necesito datos sobre tu región."
+            response, is_q, topic = self._generate_connectivity_response(region, keywords, context)
+            return response, is_q, topic
         
         elif intent == 'educacion':
-            if entities['region']:
-                return f"Excelente, vamos a hablar sobre educación en {entities['region']}. " \
-                       f"¿Cuál es tu interés específico: acceso, calidad, cobertura o conectividad?"
+            response, is_q, topic = self._generate_education_response(region, keywords, context)
+            return response, is_q, topic
+        
+        elif intent == 'mejora':
+            response, is_q, topic = self._generate_improvement_response(region, keywords, context)
+            return response, is_q, topic
+        
+        elif intent == 'prediccion':
+            response = self._generate_prediction_response(region, prediction_result, context)
+            return response, False, None
+        
+        elif intent == 'reporte':
+            response, is_q, topic = self._generate_report_response(region, context)
+            return response, is_q, topic
+        
+        else:
+            # Respuesta general contextualizada
+            if region:
+                response = f"Interesante. En {region}, veo que te interesa {intent}. Cuéntame más para ayudarte mejor."
             else:
-                return "Hablemos de educación. ¿Cuál es tu interés específico: acceso, calidad, cobertura o conectividad?"
-        
-        else:
-            region_text = f" en {entities['region']}" if entities['region'] else ""
-            return f"Interesante punto sobre {intent}{region_text}. " \
-                   f"Cuéntame más para poder ayudarte mejor. Estoy aquí para analizar la situación educativa. 🎓"
+                response = f"Entiendo tu interés en {intent}. ¿De qué región eres para darte información más útil?"
+            return response, False, None
     
-    def _generate_prediction_response(self, prediction_result: Dict) -> str:
-        """Genera respuesta específica para predicción"""
-        prediction = prediction_result['prediction']
-        prob = prediction_result['probability']
-        interpretation = prediction_result['interpretation']
-        
-        if prediction == 1:
-            template = np.random.choice(self.templates['prediccion_exito'])
+    def _generate_greeting_response(self, region: str, context: Dict) -> str:
+        """Respuesta al saludo"""
+        if context.get('message_count', 0) == 1:
+            # Primer mensaje
+            if region:
+                return f"Hola desde {region}! Perfecto. Soy BOTI, tu asistente. Ahora, ¿en qué te ayudo? ¿Conectividad, educación, o análisis general?"
+            else:
+                return "Hola! Soy BOTI. Cuéntame de qué región eres y qué necesitas analizar."
         else:
-            template = np.random.choice(self.templates['prediccion_alerta'])
+            # Saludo recurrente
+            return "¡Qué tal de nuevo! ¿Hay algo más en lo que pueda ayudarte?"
+    
+    def _generate_help_response(self, region: str, keywords: set, context: Dict) -> Tuple[str, bool, Optional[str]]:
+        """Respuesta a solicitud de ayuda"""
         
-        return f"{template}\n\n📊 Análisis: {interpretation}"
+        # Si tiene palabras clave claras
+        if 'conectividad' in keywords or 'internet' in keywords:
+            if region:
+                return f"Claro. Necesitas ayuda con conectividad en {region}. ¿Cuál es tu situación actual?", True, 'connectivity_situation'
+            else:
+                return "Entiendo que necesitas ayuda con conectividad. ¿De qué región eres?", True, 'region'
+        
+        elif 'educacion' in keywords or 'escuela' in keywords or 'colegio' in keywords:
+            if region:
+                return f"Perfecto. Vamos a hablar de educación en {region}. ¿Cuál es el desafío principal?", True, 'education_problem'
+            else:
+                return "De acuerdo, educación es importante. ¿De qué región eres?", True, 'region'
+        
+        else:
+            # Sin palabras clave claras
+            if region:
+                return f"Claro, estoy aquí para ayudarte en {region}. ¿Es sobre conectividad, educación, o indicadores generales?", True, 'main_topic'
+            else:
+                return "Claro. Cuéntame: ¿de qué región eres y qué necesitas?", True, 'region'
+    
+    def _generate_connectivity_response(self, region: str, keywords: set, context: Dict) -> Tuple[str, bool, Optional[str]]:
+        """Respuesta sobre conectividad"""
+        
+        if not region and not context.get('confirmed_region'):
+            return "La conectividad es crucial. ¿De qué región eres?", True, 'region'
+        
+        confirmed_region = region or context.get('confirmed_region')
+        
+        if 'mejorar' in keywords or 'problema' in keywords:
+            return f"Entiendo que necesitas mejorar conectividad en {confirmed_region}. ¿Cuál es tu acceso actual a internet?", True, 'current_connectivity'
+        else:
+            return f"Vemos que conectividad es importante en {confirmed_region}. ¿Tienes buena cobertura o hay limitaciones?", True, 'connectivity_status'
+    
+    def _generate_education_response(self, region: str, keywords: set, context: Dict) -> Tuple[str, bool, Optional[str]]:
+        """Respuesta sobre educación"""
+        
+        confirmed_region = region or context.get('confirmed_region')
+        
+        if not confirmed_region:
+            return "La educación es fundamental. ¿De qué región eres?", True, 'region'
+        
+        return f"Enfocándonos en educación en {confirmed_region}: ¿qué aspecto te preocupa más? (acceso, calidad, infraestructura)", True, 'education_aspect'
+    
+    def _generate_improvement_response(self, region: str, keywords: set, context: Dict) -> Tuple[str, bool, Optional[str]]:
+        """Respuesta sobre mejoras"""
+        
+        confirmed_region = region or context.get('confirmed_region')
+        
+        if not confirmed_region:
+            return "Para proponer mejoras, primero necesito saber tu región.", True, 'region'
+        
+        if context.get('primary_problem'):
+            return f"Perfecto. Para mejorar {context['primary_problem']} en {confirmed_region}, necesito datos sobre tu región. ¿Tienes información sobre población, cobertura 4G, instituciones?", True, 'data'
+        else:
+            return f"Para generar mejoras en {confirmed_region}, ¿cuál es tu principal desafío: conectividad o educación?", True, 'main_problem'
+    
+    def _generate_prediction_response(self, region: str, prediction_result: Dict, context: Dict) -> str:
+        """Respuesta para predicción"""
+        
+        confirmed_region = region or context.get('confirmed_region') or 'tu región'
+        
+        if not prediction_result or not prediction_result.get('executed'):
+            return f"Para hacer una predicción en {confirmed_region}, necesito 14 indicadores específicos. ¿Los tienes?"
+        
+        pred = prediction_result.get('prediction', 0)
+        prob = prediction_result.get('probability', 0)
+        
+        if pred == 1:
+            return f"✅ ANÁLISIS: {confirmed_region} TIENE ACCESO A INTERNET (confianza: {prob*100:.0f}%). Ahora, ¿cómo podemos mejorar aún más?"
+        else:
+            return f"⚠️ ANÁLISIS: {confirmed_region} ENFRENTA DESAFÍOS DE ACCESO (confianza: {prob*100:.0f}%). Necesitamos mejorar infraestructura. ¿Quieres propuestas?"
+    
+    def _generate_report_response(self, region: str, context: Dict) -> Tuple[str, bool, Optional[str]]:
+        """Respuesta para reporte"""
+        
+        confirmed_region = region or context.get('confirmed_region')
+        
+        if not confirmed_region:
+            return "Para generar un reporte, ¿de qué región?", True, 'region'
+        
+        return f"Puedo generar un reporte detallado de {confirmed_region}. ¿Qué indicadores te interesan incluir?", True, 'report_indicators'
 
 
 class ChatbotOrchestrator:
     """
     Orquesta todo el flujo conversacional
-    Integra: NLP + Modelos ML + Generador de respuestas
+    Integra: NLP + Modelos ML + Generador de respuestas + ConversationMemory
     """
     
-    def __init__(self, ml_model=None, vae_encoder=None, vae_decoder=None, vae_scaler=None, vae_features=None):
+    def __init__(self, ml_model=None, vae_encoder=None, vae_decoder=None, vae_scaler=None, vae_features=None, user_id: str = "default"):
         """
         ml_model: Modelo predictivo (MLP)
         vae_encoder: Encoder del VAE
         vae_decoder: Decoder del VAE
         vae_scaler: Normalizador de datos
         vae_features: Lista de features en orden correcto
+        user_id: ID único del usuario para conversación
         """
         self.ml_model = ml_model
         self.vae_encoder = vae_encoder
         self.vae_decoder = vae_decoder
         self.vae_scaler = vae_scaler
         self.vae_features = vae_features or []
+        self.user_id = user_id
         
         # Componentes NLP
         self.intent_detector = IntentDetector()
         self.entity_extractor = EntityExtractor()
         self.response_generator = ResponseGenerator()
         
-        # Contexto del usuario
+        # NUEVO: Memoria de conversación
+        self.conversation_memory = ConversationMemory(user_id)
+        self.response_generator.set_conversation_memory(self.conversation_memory)
+        
+        # Contexto del usuario (LEGACY - mantener para compatibilidad)
         self.user_context = {
             'region': None,
             'data': None,
@@ -307,7 +434,7 @@ class ChatbotOrchestrator:
     
     def process_message(self, user_message: str, user_data: Optional[Dict] = None) -> Dict:
         """
-        Procesa mensaje completo del usuario
+        Procesa mensaje completo del usuario CON MEMORIA DE CONTEXTO
         
         Args:
             user_message: Texto del usuario
@@ -325,7 +452,7 @@ class ChatbotOrchestrator:
         entities = self.entity_extractor.extract(user_message)
         logger.info(f"Entidades extraídas: {entities}")
         
-        # 3. ACTUALIZAR CONTEXTO
+        # 3. ACTUALIZAR CONTEXTO LEGACY
         if entities['region']:
             self.user_context['region'] = entities['region']
         
@@ -340,15 +467,35 @@ class ChatbotOrchestrator:
                 if intent == 'mejora' and prediction_result.get('executed'):
                     improvements_result = self._generate_improvements(user_data)
         
-        # 5. GENERAR RESPUESTA
-        response_text = self.response_generator.generate(
+        # 5. GENERAR RESPUESTA CON MEMORIA CONVERSACIONAL
+        response_tuple = self.response_generator.generate(
             intent,
             entities,
+            self.conversation_memory,  # Pasar memoria
             prediction_result,
             self.user_context['region']
         )
         
-        # 6. REGISTRAR EN HISTORIAL
+        # Desempacar respuesta
+        if isinstance(response_tuple, tuple):
+            response_text, is_question, question_topic = response_tuple
+        else:
+            response_text = response_tuple
+            is_question = False
+            question_topic = None
+        
+        # 6. REGISTRAR EN MEMORIA CON CONTEXTO
+        self.conversation_memory.add_message(
+            user_message=user_message,
+            intent=intent,
+            confidence=intent_confidence,
+            entities=entities,
+            bot_response=response_text,
+            is_question=is_question,
+            question_topic=question_topic
+        )
+        
+        # 7. REGISTRAR EN HISTORIAL LEGACY
         log_entry = {
             'timestamp': datetime.now().isoformat(),
             'user_message': user_message,
@@ -428,9 +575,9 @@ class ChatbotOrchestrator:
     def _interpret_prediction(self, prediction: int, proba: np.ndarray) -> str:
         """Interpreta predicción en texto"""
         if prediction == 1:
-            return f"✅ CON acceso a internet (confianza: {proba[1]*100:.1f}%)"
+            return f" CON acceso a internet (confianza: {proba[1]*100:.1f}%)"
         else:
-            return f"🔴 SIN acceso a internet (riesgo: {proba[0]*100:.1f}%)"
+            return f" SIN acceso a internet (riesgo: {proba[0]*100:.1f}%)"
     
     def _generate_improvements(self, user_data: Dict) -> Dict:
         """Genera mejoras con VAE si es posible"""
