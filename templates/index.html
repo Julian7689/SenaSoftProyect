@@ -147,6 +147,94 @@
     </div>
 </div>
 
+<!-- MODAL PARA CREAR NUEVA CONVERSACIÓN -->
+<div class="modal-overlay" id="newChatModal" style="display: none;">
+    <div class="modal-container new-chat-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Crear Nueva Conversación</h2>
+            <button type="button" class="modal-close" id="closeNewChatModal" aria-label="Cerrar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-content">
+            <p class="modal-description">Comienza una nueva conversación conmigo. Dale un nombre para que puedas identificarla fácilmente.</p>
+            
+            <form id="newChatForm" class="new-chat-form">
+                <div class="form-group">
+                    <label for="chatNameInput" class="form-label">Nombre de la conversación</label>
+                    <div class="input-container">
+                        <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <input 
+                            type="text" 
+                            id="chatNameInput" 
+                            class="form-input" 
+                            placeholder="Ej: Conversación sobre estrés"
+                            maxlength="60"
+                            required
+                        >
+                    </div>
+                    <span class="input-hint">Máximo 60 caracteres</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Temas de interés (opcional)</label>
+                    <div class="topics-grid">
+                        <label class="topic-checkbox">
+                            <input type="checkbox" value="emocional" data-icon="💭">
+                            <span class="topic-label">Apoyo Emocional</span>
+                        </label>
+                        <label class="topic-checkbox">
+                            <input type="checkbox" value="laboral" data-icon="💼">
+                            <span class="topic-label">Asuntos Laborales</span>
+                        </label>
+                        <label class="topic-checkbox">
+                            <input type="checkbox" value="relaciones" data-icon="💑">
+                            <span class="topic-label">Relaciones</span>
+                        </label>
+                        <label class="topic-checkbox">
+                            <input type="checkbox" value="salud" data-icon="🏥">
+                            <span class="topic-label">Salud Mental</span>
+                        </label>
+                        <label class="topic-checkbox">
+                            <input type="checkbox" value="educacion" data-icon="📚">
+                            <span class="topic-label">Educación</span>
+                        </label>
+                        <label class="topic-checkbox">
+                            <input type="checkbox" value="otro" data-icon="✨">
+                            <span class="topic-label">Otro</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelNewChat">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Crear Conversación
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <p class="modal-privacy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Tu conversación será privada y confidencial
+            </p>
+        </div>
+    </div>
+</div>
+
 <style>
 /* ==================== VARIABLES Y RESET ==================== */
 :root {
@@ -873,6 +961,266 @@ html, body {
     flex-shrink: 0;
 }
 
+/* ==================== MODAL STYLES ==================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease-out;
+    backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 500px;
+    width: 90%;
+    animation: slideUp 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 28px 28px 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: var(--bg-gray);
+    color: var(--text-primary);
+}
+
+.modal-content {
+    padding: 28px;
+}
+
+.modal-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0 0 24px 0;
+    line-height: 1.6;
+}
+
+.new-chat-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    transition: var(--transition-fast);
+    background: white;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(91, 95, 199, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+.input-hint {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.topics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.topic-checkbox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    background: white;
+}
+
+.topic-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.topic-checkbox:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.topic-checkbox input[type="checkbox"]:checked + .topic-label {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.topic-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    flex: 1;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(91, 95, 199, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--bg-gray);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+}
+
+.btn-secondary:hover {
+    border-color: var(--border);
+    background: white;
+}
+
+.modal-footer {
+    padding: 16px 28px;
+    background: var(--primary-light);
+    border-top: 1px solid rgba(91, 95, 199, 0.1);
+}
+
+.modal-privacy {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-privacy svg {
+    flex-shrink: 0;
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
     .chats-sidebar {
@@ -1499,6 +1847,32 @@ html, body {
         transform: translateX(0);
         box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
     }
+
+    /* Modal responsivo */
+    .modal-container {
+        width: 95%;
+        max-width: 95vw;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+
+    .modal-header {
+        padding: 20px 20px 16px;
+    }
+
+    .topics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn {
+        width: 100%;
+    }
 }
 </style>
 {% endblock %}
@@ -1541,6 +1915,60 @@ document.addEventListener('DOMContentLoaded', () => {
     if (newChatBtn) {
         newChatBtn.addEventListener('click', handleNewChat);
     }
+    
+    // Event listeners del modal de nuevo chat
+    const newChatModal = document.getElementById('newChatModal');
+    const closeNewChatModalBtn = document.getElementById('closeNewChatModal');
+    const cancelNewChatBtn = document.getElementById('cancelNewChat');
+    const newChatForm = document.getElementById('newChatForm');
+    
+    if (closeNewChatModalBtn) {
+        closeNewChatModalBtn.addEventListener('click', closeNewChatModal);
+    }
+    
+    if (cancelNewChatBtn) {
+        cancelNewChatBtn.addEventListener('click', closeNewChatModal);
+    }
+    
+    if (newChatModal) {
+        // Cerrar modal al hacer click fuera de él
+        newChatModal.addEventListener('click', (e) => {
+            if (e.target === newChatModal) {
+                closeNewChatModal();
+            }
+        });
+    }
+    
+    if (newChatForm) {
+        newChatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const chatNameInput = document.getElementById('chatNameInput');
+            const chatName = chatNameInput.value.trim();
+            
+            if (chatName) {
+                // Obtener temas seleccionados
+                const selectedTopics = Array.from(
+                    newChatForm.querySelectorAll('input[type="checkbox"]:checked')
+                ).map(checkbox => checkbox.value);
+                
+                createNewChatFromModal(chatName, selectedTopics);
+                chatNameInput.value = '';
+                
+                // Limpiar checkboxes
+                newChatForm.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+            }
+        });
+    }
+    
+    // Presionar Escape para cerrar modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && newChatModal && newChatModal.style.display === 'flex') {
+            closeNewChatModal();
+        }
+    });
     
     // Mobile toggle
     const menuToggle = document.getElementById('menuToggle');
@@ -1793,13 +2221,32 @@ function deleteChat(id) {
  * Crear nuevo chat
  */
 function handleNewChat() {
+    // Mostrar modal en lugar de crear el chat directamente
+    const modal = document.getElementById('newChatModal');
+    const form = document.getElementById('newChatForm');
+    const input = document.getElementById('chatNameInput');
+    
+    if (modal) {
+        modal.style.display = 'flex';
+        // Enfocar el input después de que se muestre el modal
+        setTimeout(() => {
+            if (input) input.focus();
+        }, 100);
+    }
+}
+
+/**
+ * Crear nuevo chat desde el formulario del modal
+ */
+function createNewChatFromModal(chatName, selectedTopics) {
     const newChat = {
         id: Date.now(),
-        title: `Chat ${chats.length + 1}`,
+        title: chatName || `Chat ${chats.length + 1}`,
         preview: "Nuevo chat...",
         date: new Date(),
         isToday: true,
-        messages: []
+        messages: [],
+        topics: selectedTopics || []
     };
     
     chats.unshift(newChat);
@@ -1807,6 +2254,25 @@ function handleNewChat() {
     
     saveChatsToStorage();
     selectChat(activeChat);
+    
+    // Cerrar el modal
+    closeNewChatModal();
+}
+
+/**
+ * Cerrar modal de nuevo chat
+ */
+function closeNewChatModal() {
+    const modal = document.getElementById('newChatModal');
+    const form = document.getElementById('newChatForm');
+    
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    
+    if (form) {
+        form.reset();
+    }
 }
 
 /**

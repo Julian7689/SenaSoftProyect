@@ -1,0 +1,13 @@
+prefix=c:/Users/sergi/SenaSoftProyect/.conda/Library
+exec_prefix=c:/Users/sergi/SenaSoftProyect/.conda/Library
+libdir=c:/Users/sergi/SenaSoftProyect/.conda/Library/lib
+sharedlibdir=c:/Users/sergi/SenaSoftProyect/.conda/Library/lib
+includedir=c:/Users/sergi/SenaSoftProyect/.conda/Library/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.3.1
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}

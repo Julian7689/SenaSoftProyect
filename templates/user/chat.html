@@ -344,6 +344,225 @@
                 height: auto;
             }
         }
+        
+        /* ==================== MODAL STYLES ==================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
+            backdrop-filter: blur(4px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 500px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+            overflow: hidden;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 28px 28px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            flex: 1;
+        }
+        
+        .modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: white;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-content {
+            padding: 28px;
+        }
+        
+        .modal-description {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin: 0 0 24px 0;
+            line-height: 1.6;
+        }
+        
+        .new-chat-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .form-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: #6b7280;
+            pointer-events: none;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: #111827;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+        
+        .input-hint {
+            font-size: 0.8125rem;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #111827;
+            border: 2px solid transparent;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #e5e7eb;
+            background: white;
+        }
+        
+        .modal-footer {
+            padding: 16px 28px;
+            background: #f0f1ff;
+            border-top: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .modal-privacy {
+            margin: 0;
+            font-size: 0.8125rem;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-privacy svg {
+            flex-shrink: 0;
+        }
+        
+        /* Responsive Modal */
+        @media (max-width: 768px) {
+            .modal-container {
+                max-width: 95%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -391,6 +610,64 @@
             <div class="input-wrapper">
                 <input type="text" id="messageInput" placeholder="Escribe tu mensaje..." disabled>
                 <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>📤</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL PARA CREAR NUEVA CONVERSACIÓN -->
+    <div class="modal-overlay" id="newChatModal" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 class="modal-title">Crear Nueva Conversación</h2>
+                <button type="button" class="modal-close" id="closeNewChatModal" aria-label="Cerrar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-content">
+                <p class="modal-description">Comienza una nueva conversación conmigo. Dale un nombre para que puedas identificarla fácilmente.</p>
+                
+                <form id="newChatForm" class="new-chat-form">
+                    <div class="form-group">
+                        <label for="chatNameInput" class="form-label">Nombre de la conversación</label>
+                        <div class="input-container">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <input 
+                                type="text" 
+                                id="chatNameInput" 
+                                class="form-input" 
+                                placeholder="Ej: Conversación sobre estrés"
+                                maxlength="60"
+                                required
+                            >
+                        </div>
+                        <span class="input-hint">Máximo 60 caracteres</span>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelNewChat">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Crear Conversación
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <p class="modal-privacy">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    Tu conversación será privada y confidencial
+                </p>
             </div>
         </div>
     </div>
@@ -449,9 +726,37 @@
         }
         
         // Iniciar nueva conversación
-        async function startNewConversation() {
+        // Iniciar nueva conversación
+        function startNewConversation() {
+            const modal = document.getElementById('newChatModal');
+            const input = document.getElementById('chatNameInput');
+            
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    if (input) input.focus();
+                }, 100);
+            }
+        }
+        
+        // Cerrar modal
+        function closeNewChatModal() {
+            const modal = document.getElementById('newChatModal');
+            const form = document.getElementById('newChatForm');
+            
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            
+            if (form) {
+                form.reset();
+            }
+        }
+        
+        // Crear nueva conversación desde modal
+        async function createNewChatFromModal(chatName) {
             try {
-                const title = prompt('Nombre de la conversación:') || 'Sin título';
+                const title = chatName || 'Sin título';
                 
                 const response = await fetch('/api/chat/conversation/create', {
                     method: 'POST',
@@ -463,6 +768,7 @@
                 
                 if (data.success) {
                     currentConversation = data.conversation_id;
+                    closeNewChatModal();
                     loadConversations();
                     displayConversation();
                 }
@@ -512,34 +818,80 @@
             }
         }
         
-        // Enviar mensaje
+        // Enviar mensaje (con Case Manager)
         async function sendMessage() {
-            if (!currentConversation) return;
-            
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
             if (!message) return;
+            
+            // Mostrar mensaje del usuario
+            const messagesDiv = document.getElementById('chatMessages');
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'message user';
+            userMsgDiv.innerHTML = `
+                <div class="message-avatar user">👤</div>
+                <div class="message-content">${escapeHtml(message)}</div>
+            `;
+            messagesDiv.appendChild(userMsgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
             
             input.value = '';
             input.disabled = true;
             document.getElementById('sendBtn').disabled = true;
             
             try {
-                const response = await fetch(`/api/chat/conversation/${currentConversation}/message`, {
+                // ✅ NUEVO: Usar /api/message que incluye Case Manager
+                const response = await fetch('/api/message', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({message})
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: 'user_' + (window.userId || 'anonymous'),
+                        conversation_history: getConversationHistory()
+                    })
                 });
                 
                 const data = await response.json();
                 
-                if (data.success) {
-                    displayConversation();
-                    loadConversations();
+                // Mostrar respuesta del bot
+                const botMsgDiv = document.createElement('div');
+                botMsgDiv.className = 'message assistant';
+                
+                let botContent = `
+                    <div class="message-avatar assistant">🤖</div>
+                    <div class="message-content">${escapeHtml(data.response)}</div>
+                `;
+                
+                // ✅ Si hay caso detectado, mostrar información adicional
+                if (data.case_id) {
+                    botContent += `
+                        <div class="case-info" style="margin-top: 10px; padding: 10px; background: #f0f7ff; border-left: 4px solid #007bff; border-radius: 4px;">
+                            <strong>🎯 Caso Detectado:</strong><br>
+                            📋 ID: ${data.case_id}<br>
+                            🚨 Urgencia: <span style="color: ${getUrgencyColor(data.urgency)}">${data.urgency}</span><br>
+                            📊 Impacto: ${data.impact_score || 0}/100<br>
+                            💡 Soluciones: ${data.solutions_offered || 0}<br>
+                            <button class="btn btn-sm btn-primary" onclick="activateSolution('${data.case_id}')" style="margin-top: 8px;">
+                                ✅ Activar Solución
+                            </button>
+                        </div>
+                    `;
                 }
+                
+                botMsgDiv.innerHTML = botContent;
+                messagesDiv.appendChild(botMsgDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                
             } catch (error) {
                 console.error('Error:', error);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'message assistant';
+                errorDiv.innerHTML = `
+                    <div class="message-avatar assistant">🤖</div>
+                    <div class="message-content">❌ Error procesando mensaje</div>
+                `;
+                messagesDiv.appendChild(errorDiv);
             } finally {
                 input.disabled = false;
                 document.getElementById('sendBtn').disabled = false;
@@ -547,9 +899,91 @@
             }
         }
         
+        // Función auxiliar: obtener historial de conversación
+        function getConversationHistory() {
+            const messages = document.querySelectorAll('#chatMessages .message');
+            return Array.from(messages).map(msg => {
+                const content = msg.querySelector('.message-content')?.textContent.trim() || '';
+                const role = msg.classList.contains('user') ? 'user' : 'assistant';
+                return { role, content };
+            }).filter(m => m.content);
+        }
+        
+        // Función auxiliar: color según urgencia
+        function getUrgencyColor(urgency) {
+            const colors = {
+                'baja': '#28a745',
+                'media': '#ffc107',
+                'alta': '#fd7e14',
+                'crítica': '#dc3545'
+            };
+            return colors[urgency] || '#6c757d';
+        }
+        
+        // Función auxiliar: escapar HTML
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        // Activar solución (placeholder)
+        function activateSolution(caseId) {
+            alert('✅ Solución activada para caso: ' + caseId);
+            // TODO: Integrar con endpoint /api/case/{caseId}/activate
+        }
+        
         // Enter para enviar
         document.getElementById('messageInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Event listeners del modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const newChatModal = document.getElementById('newChatModal');
+            const closeNewChatModalBtn = document.getElementById('closeNewChatModal');
+            const cancelNewChatBtn = document.getElementById('cancelNewChat');
+            const newChatForm = document.getElementById('newChatForm');
+            
+            if (closeNewChatModalBtn) {
+                closeNewChatModalBtn.addEventListener('click', closeNewChatModal);
+            }
+            
+            if (cancelNewChatBtn) {
+                cancelNewChatBtn.addEventListener('click', closeNewChatModal);
+            }
+            
+            if (newChatModal) {
+                newChatModal.addEventListener('click', (e) => {
+                    if (e.target === newChatModal) {
+                        closeNewChatModal();
+                    }
+                });
+            }
+            
+            if (newChatForm) {
+                newChatForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const chatNameInput = document.getElementById('chatNameInput');
+                    const chatName = chatNameInput.value.trim();
+                    
+                    if (chatName) {
+                        createNewChatFromModal(chatName);
+                        chatNameInput.value = '';
+                    }
+                });
+            }
+            
+            // Presionar Escape para cerrar modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && newChatModal && newChatModal.style.display === 'flex') {
+                    closeNewChatModal();
+                }
+            });
         });
         
         // Logout

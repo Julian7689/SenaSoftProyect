@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Modal - Crear Nueva Conversación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #111827;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-button {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #5b5fc7, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(91, 95, 199, 0.3);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f0f1ff 0%, #ede9fe 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #5b5fc7;
+        }
+
+        .feature-card h3 {
+            color: #5b5fc7;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .comparison-item {
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .before {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+
+        .after {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+        }
+
+        .comparison-item h4 {
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .before h4 {
+            color: #991b1b;
+        }
+
+        .after h4 {
+            color: #166534;
+        }
+
+        .comparison-item p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .before p {
+            color: #7f1d1d;
+        }
+
+        .after p {
+            color: #166534;
+        }
+
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .demo-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Modal Estético - Crear Nueva Conversación</h1>
+        <p class="subtitle">Mejora de UX para la interfaz de BOTI</p>
+
+        <div class="demo-section">
+            <h2>🎯 Demostración Interactiva</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">
+                Haz click en el botón para ver el modal en acción:
+            </p>
+            <button class="demo-button" onclick="openDemoModal()">
+                + Abrir Modal de Nuevo Chat
+            </button>
+        </div>
+
+        <div class="demo-section">
+            <h2>✨ Características Principales</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h3><span class="icon">🎨</span>Diseño Moderno</h3>
+                    <p>Colores degradados (azul a púrpura), animaciones suaves y profesionales. Efecto blur en el fondo para mejor enfoque.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3><span class="icon">📱</span>Responsivo</h3>
+                    <p>Se adapta perfectamente a desktop, tablet y mobile. Proporciones automáticas según tamaño de pantalla.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3><span class="icon">⌨️</span>Accesibilidad</h3>
+                    <p>Auto-foco en input, cierre con ESC, validación visual y mensajes claros. Totalmente navegable.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3><span class="icon">🔒</span>Privacidad</h3>
+                    <p>Recordatorio de conversación privada visible en el footer. Almacenamiento local y datos seguros.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3><span class="icon">🎯</span>Temas Opcionales</h3>
+                    <p>6 temas seleccionables para categorizar conversaciones: emocional, laboral, relaciones, salud mental, educación y otros.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3><span class="icon">✅</span>Validación</h3>
+                    <p>Nombre requerido (máx 60 caracteres). Contador de caracteres visual. Validación en tiempo real.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>📊 Comparación: Antes vs Después</h2>
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h4>❌ Antes</h4>
+                    <p>
+                        • Creaba chat directamente sin confirmación<br>
+                        • Sin nombre personalizado<br>
+                        • Sin opción de categorizar<br>
+                        • Experiencia simple y poco atractiva<br>
+                        • Sin validación visual
+                    </p>
+                </div>
+
+                <div class="comparison-item after">
+                    <h4>✅ Después</h4>
+                    <p>
+                        • <span class="highlight">Modal estético</span> con confirmación<br>
+                        • Nombre personalizado con límite de caracteres<br>
+                        • 6 temas para categorizar conversaciones<br>
+                        • <span class="highlight">Experiencia moderna y atractiva</span><br>
+                        • Validación completa y animaciones suaves
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>💻 Detalles Técnicos</h2>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 10px;">Estructura HTML</h3>
+            <div class="code-block">
+&lt;div class="modal-overlay" id="newChatModal"&gt;
+    &lt;div class="modal-container"&gt;
+        &lt;div class="modal-header"&gt;
+            &lt;h2&gt;Crear Nueva Conversación&lt;/h2&gt;
+            &lt;button class="modal-close"&gt;...&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-content"&gt;
+            &lt;form id="newChatForm"&gt;
+                &lt;input type="text" id="chatNameInput" /&gt;
+                &lt;div class="topics-grid"&gt;...&lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+            </div>
+
+            <h3 style="margin-top: 20px; margin-bottom: 10px;">Variables CSS Utilizadas</h3>
+            <div class="code-block">
+--primary: #5b5fc7 (Azul principal)
+--secondary: #7c3aed (Púrpura)
+--primary-light: #f0f1ff (Fondo claro)
+--border: #e5e7eb (Bordes)
+--text-primary: #111827 (Texto principal)
+--text-secondary: #6b7280 (Texto secundario)
+            </div>
+
+            <h3 style="margin-top: 20px; margin-bottom: 10px;">Funciones JavaScript</h3>
+            <div class="code-block">
+handleNewChat()  - Abre el modal
+createNewChatFromModal(name, topics) - Crea el chat
+closeNewChatModal() - Cierra el modal
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎨 Temas Disponibles</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
+                <div style="padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">💭</div>
+                    <div style="font-weight: 600; color: #111827;">Apoyo Emocional</div>
+                </div>
+                <div style="padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">💼</div>
+                    <div style="font-weight: 600; color: #111827;">Asuntos Laborales</div>
+                </div>
+                <div style="padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">💑</div>
+                    <div style="font-weight: 600; color: #111827;">Relaciones</div>
+                </div>
+                <div style="padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">🏥</div>
+                    <div style="font-weight: 600; color: #111827;">Salud Mental</div>
+                </div>
+                <div style="padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">📚</div>
+                    <div style="font-weight: 600; color: #111827;">Educación</div>
+                </div>
+                <div style="padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">✨</div>
+                    <div style="font-weight: 600; color: #111827;">Otro</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🚀 Cómo Usar</h2>
+            <ol style="color: #6b7280; line-height: 2; margin-left: 20px;">
+                <li>Haz click en el botón <strong>"Nuevo Chat"</strong> en la sidebar</li>
+                <li>Se abre el modal estético con animación suave</li>
+                <li>Ingresa un <strong>nombre para la conversación</strong> (máx 60 caracteres)</li>
+                <li>Opcionalmente selecciona <strong>temas de interés</strong></li>
+                <li>Haz click en <strong>"Crear Conversación"</strong></li>
+                <li>¡Listo! Tu nuevo chat se crea y se selecciona automáticamente</li>
+            </ol>
+        </div>
+
+        <div class="demo-section" style="text-align: center; background: linear-gradient(135deg, #f0f1ff 0%, #ede9fe 100%);">
+            <h2 style="color: #5b5fc7;">✅ Implementación Completada</h2>
+            <p style="color: #6b7280; font-size: 1.1rem; margin-top: 10px;">
+                El modal ha sido integrado exitosamente en la plantilla index.html<br>
+                <strong>Versión:</strong> 1.0 | <strong>Estado:</strong> Producción ✨
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function openDemoModal() {
+            alert('🎉 Modal implementado en la aplicación.\n\nEn la aplicación real, esto abrirá un hermoso modal estético para crear nuevas conversaciones.\n\n✨ ¡Pruébalo en la interfaz de BOTI!');
+        }
+    </script>
+</body>
+</html>

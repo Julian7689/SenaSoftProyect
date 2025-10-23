@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import os
 import logging
 from datetime import datetime
+from typing import Dict, List
 import joblib
 import numpy as np
 import pandas as pd
@@ -25,6 +26,7 @@ load_dotenv()
 
 # Importar módulos propios
 from src.chatbot.chatbot_orchestrator import ChatbotOrchestrator
+from src.chatbot.enhanced_orchestrator import EnhancedChatbotOrchestrator  # ← NUEVO
 from src.auth.mock_auth import MockAuthService
 from src.conversation.mock_store import MockConversationStore
 from src.api.routes_mock import auth_bp, chat_bp, admin_bp
@@ -104,7 +106,7 @@ def load_ml_model():
         return False
 
 def load_orchestrator():
-    """Cargar el orquestador conversacional con todos los componentes"""
+    """Cargar el orquestador conversacional mejorado con Case Manager"""
     global CHATBOT_ORCHESTRATOR, VAE_ENCODER, VAE_DECODER, VAE_SCALER, ORCHESTRATOR_READY
     
     try:
@@ -135,15 +137,22 @@ def load_orchestrator():
             else:
                 logger.info("ℹ Modelos VAE no encontrados - procedeiendo sin ellos")
 
-        CHATBOT_ORCHESTRATOR = ChatbotOrchestrator(
+        # ✅ USAR ORQUESTADOR MEJORADO CON CASE MANAGER
+        CHATBOT_ORCHESTRATOR = EnhancedChatbotOrchestrator(
             ml_model=ML_MODEL,
             vae_encoder=VAE_ENCODER,
             vae_decoder=VAE_DECODER,
             vae_scaler=VAE_SCALER,
             vae_features=MODEL_FEATURES
         )
+        
+        # Actualizar variables globales
+        globals()['CHATBOT_ORCHESTRATOR'] = CHATBOT_ORCHESTRATOR
+        globals()['ORCHESTRATOR_READY'] = True
+        
         ORCHESTRATOR_READY = True
-        logger.info("✓ ChatbotOrchestrator inicializado correctamente")
+        logger.info("✓ EnhancedChatbotOrchestrator inicializado (con Case Manager)")
+        logger.info("✅ Case Manager ACTIVO - Ahora detecta urgencia y busca soluciones")
         return True
         
     except Exception as e:
@@ -188,83 +197,118 @@ def info():
 @app.route('/api/message', methods=['POST'])
 def send_message():
     """
-    Endpoint para recibir mensajes del usuario y obtener respuesta del chatbot
+    Endpoint mejorado para recibir mensajes Y gestionar casos sociales
     
     Request JSON:
     {
         "message": "texto del mensaje",
         "session_id": "id-opcional-de-sesion",
-        "user_data": { "feature1": value1, ... }  # opcional
+        "conversation_history": [...]  # histórico de conversación
     }
     
     Response JSON:
     {
         "response": "respuesta del bot",
-        "intent": "intención_detectada",
-        "category": "categoria_detectada",
+        "case_id": "CASE_... o null",
         "urgency": "low|medium|high|critical",
-        "resources": [...],
-        "timestamp": "2025-10-21T10:30:00"
+        "solutions_offered": 0,
+        "requires_action": false,
+        "generated_by": "generative_model|case_manager"
     }
     """
     try:
         data = request.get_json()
         user_message = data.get('message', '')
         session_id = data.get('session_id', None)
-        user_data = data.get('user_data', None)
+        conversation_history = data.get('conversation_history', [])
         
         if not user_message:
             return jsonify({'error': 'Mensaje vacío'}), 400
         
-        logger.info(f"Mensaje recibido: {user_message[:50]}...")
-        logger.info(f"Estado del orquestador - READY: {ORCHESTRATOR_READY}, INSTANCE: {CHATBOT_ORCHESTRATOR is not None}")
+        logger.info(f"📨 Mensaje recibido: {user_message[:50]}...")
         
-        # Usar el orquestador si está disponible
+        # Usar el orquestador mejorado si está disponible
         if ORCHESTRATOR_READY and CHATBOT_ORCHESTRATOR:
             try:
-                logger.info("✓ Usando ChatbotOrchestrator para procesar mensaje")
-                result = CHATBOT_ORCHESTRATOR.process_message(user_message, user_data)
-                logger.info(f"✓ Respuesta del orquestador: {result['response'][:100]}...")
+                logger.info("✅ Procesando con EnhancedChatbotOrchestrator")
                 
-                response = {
-                    'response': result['response'],
-                    'intent': result['intent'],
-                    'intent_confidence': result['intent_confidence'],
-                    'entities': result['entities'],
-                    'prediction': result['prediction'],
-                    'improvements': result['improvements'],
-                    'region': result['region'],
-                    'timestamp': result['timestamp'],
-                    'using_orchestrator': True
-                }
+                # ✅ NUEVO: Procesar con gestión de casos
+                result = CHATBOT_ORCHESTRATOR.process_message_with_case_management(
+                    user_message=user_message,
+                    conversation_history=conversation_history
+                )
                 
-                return jsonify(response), 200
+                # Log detallado
+                logger.info(f"   └─ Intent: {result.get('intent')}")
+                logger.info(f"   └─ Generated by: {result.get('generated_by')}")
+                
+                if result.get('case_id'):
+                    logger.warning(f"   ⚠️ CASO DETECTADO: {result['case_id']}")
+                    logger.info(f"      └─ Urgencia: {result['urgency']}")
+                    logger.info(f"      └─ Impacto: {result['impact_score']:.0f}/100")
+                    logger.info(f"      └─ Soluciones: {result['solutions_offered']}")
+                
+                # Guardar en base de datos (simulado por ahora)
+                add_message_to_log(
+                    user_id=session_id or 'anonymous',
+                    role='user',
+                    content=user_message,
+                    metadata={
+                        'case_id': result.get('case_id'),
+                        'intent': result.get('intent')
+                    }
+                )
+                
+                add_message_to_log(
+                    user_id=session_id or 'anonymous',
+                    role='assistant',
+                    content=result['response'],
+                    metadata={
+                        'case_id': result.get('case_id'),
+                        'generated_by': result.get('generated_by'),
+                        'urgency': result.get('urgency')
+                    }
+                )
+                
+                return jsonify(result), 200
             
             except Exception as e:
-                logger.error(f"✗ Error en orquestador: {str(e)}")
+                logger.error(f"❌ Error en orquestador: {str(e)}")
                 import traceback
                 logger.error(traceback.format_exc())
-                # Fallback a respuesta simple
-        else:
-            logger.warning("⚠ Orquestador NO disponible, usando fallback")
         
-        # Fallback: respuesta simple (sin orquestador)
+        # Fallback: respuesta simple
+        logger.warning("⚠️ Orquestador NO disponible, respuesta por defecto")
         response = {
             'response': 'Gracias por escribir. Estoy aquí para ayudarte. ¿Puedes contarme más sobre tu situación?',
             'intent': 'general',
-            'intent_confidence': 0.0,
-            'category': 'unknown',
-            'urgency': 'low',
-            'resources': [],
-            'timestamp': datetime.now().isoformat(),
-            'using_orchestrator': False
+            'confidence': 0.0,
+            'case_id': None,
+            'requires_action': False,
+            'generated_by': 'fallback',
+            'timestamp': datetime.now().isoformat()
         }
         
         return jsonify(response), 200
         
     except Exception as e:
-        logger.error(f"Error procesando mensaje: {str(e)}")
+        logger.error(f"❌ Error procesando mensaje: {str(e)}")
         return jsonify({'error': 'Error interno del servidor'}), 500
+
+
+def add_message_to_log(user_id: str, role: str, content: str, metadata: Dict = None):
+    """Guardar mensaje en log (expandible a BD real)"""
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'user_id': user_id,
+            'role': role,
+            'content': content[:200],  # Truncar para logging
+            'metadata': metadata or {}
+        }
+        logger.info(f"📝 {role.upper()}: {log_entry}")
+    except Exception as e:
+        logger.warning(f"Error logging message: {e}")
 
 @app.route('/api/resources', methods=['GET'])
 def get_resources():
@@ -316,6 +360,106 @@ def report_emergency():
     except Exception as e:
         logger.error(f"Error en reporte de emergencia: {str(e)}")
         return jsonify({'error': 'Error procesando emergencia'}), 500
+
+# ==================== ENDPOINTS DE GESTIÓN DE CASOS (NUEVO) ====================
+
+@app.route('/api/case/<case_id>/activate', methods=['POST'])
+def activate_case(case_id):
+    """
+    Endpoint para activar una solución de caso
+    
+    Request JSON:
+    {
+        "solution_index": 0,  # opcional, default 0
+        "user_data": {
+            "phone": "310-...",
+            "location": {...},
+            "consent": true
+        }
+    }
+    """
+    try:
+        if not ORCHESTRATOR_READY or not isinstance(CHATBOT_ORCHESTRATOR, EnhancedChatbotOrchestrator):
+            return jsonify({'error': 'Case Manager no disponible'}), 503
+        
+        data = request.get_json() or {}
+        solution_index = data.get('solution_index', 0)
+        user_data = data.get('user_data', {})
+        
+        result = CHATBOT_ORCHESTRATOR.activate_case_solution(
+            case_id=case_id,
+            user_data=user_data,
+            solution_index=solution_index
+        )
+        
+        if result['success']:
+            logger.info(f"✅ Caso {case_id} activado con éxito")
+            return jsonify(result), 200
+        else:
+            logger.warning(f"⚠️ Error activando caso {case_id}")
+            return jsonify(result), 400
+    
+    except Exception as e:
+        logger.error(f"❌ Error en activate_case: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/case/<case_id>/status', methods=['GET'])
+def get_case_status(case_id):
+    """Obtener estado de un caso"""
+    try:
+        if not ORCHESTRATOR_READY or not isinstance(CHATBOT_ORCHESTRATOR, EnhancedChatbotOrchestrator):
+            return jsonify({'error': 'Case Manager no disponible'}), 503
+        
+        status = CHATBOT_ORCHESTRATOR.get_case_status(case_id)
+        
+        if 'error' in status:
+            return jsonify(status), 404
+        
+        return jsonify(status), 200
+    
+    except Exception as e:
+        logger.error(f"Error obteniendo estado del caso: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/user/<user_id>/cases', methods=['GET'])
+def get_user_cases(user_id):
+    """Obtener todos los casos de un usuario"""
+    try:
+        if not ORCHESTRATOR_READY or not isinstance(CHATBOT_ORCHESTRATOR, EnhancedChatbotOrchestrator):
+            return jsonify({'error': 'Case Manager no disponible'}), 503
+        
+        cases = CHATBOT_ORCHESTRATOR.get_user_cases(user_id)
+        
+        return jsonify({
+            'user_id': user_id,
+            'total_cases': len(cases),
+            'cases': cases
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"Error obteniendo casos del usuario: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/case/<case_id>/impact', methods=['GET'])
+def get_case_impact(case_id):
+    """Obtener reporte de impacto de un caso"""
+    try:
+        if not ORCHESTRATOR_READY or not isinstance(CHATBOT_ORCHESTRATOR, EnhancedChatbotOrchestrator):
+            return jsonify({'error': 'Case Manager no disponible'}), 503
+        
+        report = CHATBOT_ORCHESTRATOR.generate_impact_report(case_id)
+        
+        if 'error' in report:
+            return jsonify(report), 404
+        
+        return jsonify(report), 200
+    
+    except Exception as e:
+        logger.error(f"Error generando reporte de impacto: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # ==================== ENDPOINT DE PREDICCIÓN ML ====================
 
