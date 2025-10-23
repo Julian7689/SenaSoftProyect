@@ -6,12 +6,7 @@
     <title>BOTI - Panel de Administración</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+                // 'Menores Conectados' eliminado según solicitud
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
@@ -221,18 +216,18 @@
     </style>
 </head>
 <body>
-    <!-- NAVBAR -->
+
     <div class="navbar">
-        <h1>🎯 Panel de Administración BOTI</h1>
+        <h1> Panel de Administración BOTI</h1>
         <div class="navbar-right">
-            <span id="adminName">👤 Administrador</span>
-            <button class="refresh-btn" onclick="refreshData()">🔄 Actualizar</button>
-            <button class="logout-btn" onclick="logout()">🔐 Salir</button>
+            <span id="adminName"> Administrador</span>
+            <button class="refresh-btn" onclick="refreshData()">Actualizar</button>
+            <button class="logout-btn" onclick="logout()">Salir</button>
         </div>
     </div>
     
     <div class="container">
-        <!-- ESTADÍSTICAS -->
+        
         <div class="stats-grid" id="statsGrid">
             <div class="loading">
                 <div class="loading-spinner"></div>
@@ -240,36 +235,34 @@
             </div>
         </div>
         
-        <!-- GRÁFICOS -->
+      
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>📊 Usuarios por Región</h3>
+                <h3>Usuarios por Región</h3>
                 <canvas id="regionChart"></canvas>
             </div>
             
             <div class="chart-card">
-                <h3>👥 Distribución de Roles</h3>
-                <canvas id="rolesChart"></canvas>
+                <h3> Histograma: Puntajes de Pruebas</h3>
+                <canvas id="puntajeHistChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3> Cobertura 4G vs Puntaje (muestra)</h3>
+                <canvas id="scatterChart"></canvas>
             </div>
         </div>
         
-        <!-- TABLA DE USUARIOS -->
+
         <div class="table-card">
-            <h3>👥 Últimos Usuarios Registrados</h3>
-            <table id="usersTable">
+            <h3> Resumen de cobertura</h3>
+            <table>
                 <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Conversaciones</th>
-                        <th>Consentimiento</th>
-                    </tr>
+                    <tr><th>Métrica</th><th>Valor</th></tr>
                 </thead>
-                <tbody id="usersTableBody">
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #999;">Cargando...</td>
-                    </tr>
+                <tbody>
+                    <tr><td>Promedio Puntaje</td><td id="avgPuntaje">-</td></tr>
+                    <tr><td>Promedio Cobertura 4G</td><td id="avgCobertura">-</td></tr>
+                    <tr><td>Registros</td><td id="totalRows">-</td></tr>
                 </tbody>
             </table>
         </div>
@@ -277,7 +270,7 @@
         <!-- TABLA DE ESTADÍSTICAS DETALLADAS -->
         <div style="margin-top: 30px;">
             <div class="table-card">
-                <h3>📈 Estadísticas Detalladas</h3>
+                <h3>Estadísticas Detalladas</h3>
                 <table>
                     <thead>
                         <tr>
@@ -326,7 +319,6 @@
                     dashboardData = data.data;
                     renderStats();
                     renderCharts();
-                    renderUsersTable();
                     renderStatsTable();
                 }
             } catch (error) {
@@ -355,7 +347,7 @@
                 {
                     label: 'Menores Conectados',
                     value: dashboardData.children_connected || 0,
-                    icon: '👶',
+                    icon: '',
                     meta: 'Menores de edad'
                 },
                 {
@@ -422,60 +414,44 @@
                 }
             });
             
-            // Gráfico de roles
-            const rolesCtx = document.getElementById('rolesChart').getContext('2d');
-            if (charts.roles) charts.roles.destroy();
-            
-            charts.roles = new Chart(rolesCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Administradores', 'Usuarios'],
-                    datasets: [{
-                        data: [
-                            dashboardData.admin_count || 0,
-                            dashboardData.user_count || 0
-                        ],
-                        backgroundColor: ['#667eea', '#764ba2'],
-                        borderColor: white,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+            // Histograma de puntajes (usando dataset_stats.puntaje_hist)
+            const histCtx = document.getElementById('puntajeHistChart') ? document.getElementById('puntajeHistChart').getContext('2d') : null;
+            if (histCtx) {
+                if (charts.hist) charts.hist.destroy();
+                const hist = dashboardData.dataset_stats ? dashboardData.dataset_stats.puntaje_hist : {bins: [], counts: []};
+                charts.hist = new Chart(histCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: hist.bins || [],
+                        datasets: [{ label: 'Frecuencia', data: hist.counts || [], backgroundColor: '#667eea' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+            }
+
+            // Scatter cobertura 4G vs puntaje (muestra)
+            const scatterCtx = document.getElementById('scatterChart') ? document.getElementById('scatterChart').getContext('2d') : null;
+            if (scatterCtx) {
+                if (charts.scatter) charts.scatter.destroy();
+                const scatterSample = (dashboardData.dataset_stats && dashboardData.dataset_stats.scatter_sample) ? dashboardData.dataset_stats.scatter_sample : [];
+                charts.scatter = new Chart(scatterCtx, {
+                    type: 'scatter',
+                    data: { datasets: [{ label: 'Cobertura4G vs Puntaje', data: scatterSample, backgroundColor: '#764ba2' }] },
+                    options: { responsive: true, maintainAspectRatio: true, scales: { x: { title: { display: true, text: 'Cobertura 4G (%)' } }, y: { title: { display: true, text: 'Puntaje pruebas' } } } }
+                });
+            }
+
+            // Llenar resumen del dataset si existen elementos
+            if (dashboardData.dataset_stats) {
+                const avgP = dashboardData.dataset_stats.avg_puntaje || 0;
+                const avgC = dashboardData.dataset_stats.avg_cobertura_4g || 0;
+                document.getElementById('avgPuntaje') && (document.getElementById('avgPuntaje').textContent = avgP);
+                document.getElementById('avgCobertura') && (document.getElementById('avgCobertura').textContent = avgC);
+                document.getElementById('totalRows') && (document.getElementById('totalRows').textContent = dashboardData.total_users || 0);
+            }
         }
         
-        // Renderizar tabla de usuarios
-        function renderUsersTable() {
-            const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '';
-            
-            const users = dashboardData.latest_users || [];
-            
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Sin usuarios</td></tr>';
-                return;
-            }
-            
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${escapeHtml(user.username || 'N/A')}</td>
-                    <td>${escapeHtml(user.email || 'N/A')}</td>
-                    <td><span class="badge badge-${user.role}">${user.role}</span></td>
-                    <td>${user.conversation_count || 0}</td>
-                    <td><span class="badge badge-${user.consent ? 'active' : 'inactive'}">${user.consent ? '✓ Dado' : '✗ Pendiente'}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+        // (users table removed; dashboard focuses on dataset visuals)
         
         // Renderizar tabla de estadísticas
         function renderStatsTable() {

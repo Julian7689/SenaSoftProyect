@@ -90,17 +90,28 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
         if any(keyword in user_message.lower() for keyword in 
                ['region', 'departamento', 'cobertura', 'internet', 'conectividad', 'colombia']):
             logger.info("🌍 Detectada pregunta sobre conectividad regional")
-            
-            # Obtener contexto regional específico
-            regional_context = self.question_generator.get_regional_context(user_message)
-            
-            # Generar preguntas inteligentes basadas en el mensaje y contexto regional
-            intelligent_questions = self.question_generator.generate_contextual_questions(
-                user_message=user_message,
-                user_id=self.user_id,
-                conversation_history=conversation_history,
-                regional_context=regional_context
-            )
+
+            # Obtener/crear contexto conversacional del generador
+            try:
+                q_context = self.question_generator.get_conversation_context(self.user_id)
+
+                # Intentar detectar región mencionada en el mensaje
+                detected_region = self.question_generator.detect_region(user_message, q_context)
+
+                if detected_region:
+                    regional_context = self.question_generator.get_regional_info(detected_region)
+                else:
+                    regional_context = None
+
+                # Generar preguntas inteligentes basadas en el mensaje y contexto
+                intelligent_questions = self.question_generator.generate_next_questions(
+                    user_message=user_message,
+                    user_id=self.user_id
+                )
+            except Exception as e:
+                logger.warning(f"⚠️ IntelligentQuestionGenerator falló: {e}")
+                intelligent_questions = []
+                regional_context = None
             
             logger.info(f"✨ Generadas {len(intelligent_questions)} preguntas inteligentes")
             if regional_context:
@@ -235,16 +246,16 @@ class EnhancedChatbotOrchestrator(ChatbotOrchestrator):
 
 ---
 
-🎯 **Tengo una solución para ti:**
+**Tengo una solución para ti:**
 
 He encontrado una opción de {solution_type} disponible en tu zona, completamente patrocinada por {best_solution.sponsor_name}.
 
-✨ **Detalles de la solución:**
-📌 Tipo: {solution_type.title()}
-⏱️ Duración: {best_solution.duration_months} meses
-💰 Costo para ti: **GRATIS** (100% patrocinado)
-📊 Coincidencia con tu necesidad: {int(best_solution.match_score * 100)}%
-📦 Cupos disponibles: {best_solution.capacity_remaining}"""
+ **Detalles de la solución:**
+ Tipo: {solution_type.title()}
+ Duración: {best_solution.duration_months} meses
+ Costo para ti: **GRATIS** (100% patrocinado)
+ Coincidencia con tu necesidad: {int(best_solution.match_score * 100)}%
+ Cupos disponibles: {best_solution.capacity_remaining}"""
 
         # Agregar contexto regional si está disponible
         if regional_context:
@@ -253,11 +264,11 @@ He encontrado una opción de {solution_type} disponible en tu zona, completament
             
             synthesized += f"""
 
-🌍 **Información regional - {dept_name}:**
-📶 Nivel de cobertura actual: {coverage_level}/5
-🏘️ Municipios más afectados: {', '.join(regional_context.get('problematic_areas', [])[:3])}
-🏠 Hogares sin conectividad: {regional_context.get('households_without_connectivity', 'N/A'):,}
-🎯 Programas activos en la región: {len(regional_context.get('active_programs', []))}"""
+ **Información regional - {dept_name}:**
+ Nivel de cobertura actual: {coverage_level}/5
+Municipios más afectados: {', '.join(regional_context.get('problematic_areas', [])[:3])}
+ Hogares sin conectividad: {regional_context.get('households_without_connectivity', 'N/A'):,}
+ Programas activos en la región: {len(regional_context.get('active_programs', []))}"""
 
         # Agregar preguntas inteligentes
         if intelligent_questions:

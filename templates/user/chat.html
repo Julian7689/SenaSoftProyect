@@ -848,7 +848,9 @@
                     body: JSON.stringify({
                         message: message,
                         session_id: 'user_' + (window.userId || 'anonymous'),
-                        conversation_history: getConversationHistory()
+                        conversation_id: currentConversation,
+                        conversation_history: getConversationHistory(),
+                        simple_script: true
                     })
                 });
                 
@@ -863,18 +865,17 @@
                     <div class="message-content">${escapeHtml(data.response)}</div>
                 `;
                 
-                // ✅ Si hay caso detectado, mostrar información adicional
+                // ✅ Si hay caso detectado, mostrar tarjeta compacta con botón de activación (sin metadatos)
                 if (data.case_id) {
                     botContent += `
-                        <div class="case-info" style="margin-top: 10px; padding: 10px; background: #f0f7ff; border-left: 4px solid #007bff; border-radius: 4px;">
-                            <strong>🎯 Caso Detectado:</strong><br>
-                            📋 ID: ${data.case_id}<br>
-                            🚨 Urgencia: <span style="color: ${getUrgencyColor(data.urgency)}">${data.urgency}</span><br>
-                            📊 Impacto: ${data.impact_score || 0}/100<br>
-                            💡 Soluciones: ${data.solutions_offered || 0}<br>
-                            <button class="btn btn-sm btn-primary" onclick="activateSolution('${data.case_id}')" style="margin-top: 8px;">
-                                ✅ Activar Solución
-                            </button>
+                        <div class="case-card" style="margin-top: 10px; padding: 12px; background: #ffffff; border: 1px solid #e6eef8; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display:flex; align-items:center; justify-content:space-between;">
+                            <div style="flex:1; padding-right:12px;">
+                                <strong>Solución recomendada</strong>
+                                <div style="color:#6c757d; font-size:0.9em; margin-top:6px;">Se ha detectado una acción que puede solucionar el problema. Pulsa "Activar solución" para iniciar.</div>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary" onclick="activateSolution('${data.case_id}')" style="min-width:130px;">Activar solución</button>
+                            </div>
                         </div>
                     `;
                 }
@@ -930,10 +931,59 @@
                 .replace(/'/g, "&#039;");
         }
         
-        // Activar solución (placeholder)
-        function activateSolution(caseId) {
-            alert('✅ Solución activada para caso: ' + caseId);
-            // TODO: Integrar con endpoint /api/case/{caseId}/activate
+        // Activar solución: solicita la activación al backend con consentimiento explícito
+        async function activateSolution(caseId) {
+            const messagesDiv = document.getElementById('chatMessages');
+            // mostrar indicador de activación
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.innerHTML = `
+                <div class="message-avatar assistant">🤖</div>
+                <div class="message-content">Activando solución...</div>
+            `;
+            messagesDiv.appendChild(loadingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            try {
+                const response = await fetch('/api/message', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        message: `Activar caso ${caseId}`,
+                        session_id: 'user_' + (window.userId || 'anonymous'),
+                        conversation_id: currentConversation,
+                        conversation_history: getConversationHistory(),
+                        consent: true,
+                        auto_activate_case: true,
+                        case_id: caseId,
+                        // Mantener coherencia: usar bot simple también para activaciones
+                        simple_script: true
+                    })
+                });
+
+                const data = await response.json();
+                // quitar indicador y mostrar respuesta del bot
+                loadingDiv.remove();
+                const botMsgDiv = document.createElement('div');
+                botMsgDiv.className = 'message assistant';
+                botMsgDiv.innerHTML = `
+                    <div class="message-avatar assistant">🤖</div>
+                    <div class="message-content">${escapeHtml(data.response || 'Solución activada')}</div>
+                `;
+                messagesDiv.appendChild(botMsgDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            } catch (error) {
+                console.error('Error activating solution:', error);
+                loadingDiv.remove();
+                const errDiv = document.createElement('div');
+                errDiv.className = 'message assistant';
+                errDiv.innerHTML = `
+                    <div class="message-avatar assistant">🤖</div>
+                    <div class="message-content">Error activando la solución</div>
+                `;
+                messagesDiv.appendChild(errDiv);
+            }
         }
         
         // Enter para enviar

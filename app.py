@@ -20,6 +20,8 @@ import joblib
 import numpy as np
 import pandas as pd
 from pathlib import Path
+import traceback
+import re
 
 # Cargar variables de entorno
 load_dotenv()
@@ -27,6 +29,7 @@ load_dotenv()
 # Importar módulos propios
 from src.chatbot.chatbot_orchestrator import ChatbotOrchestrator
 from src.chatbot.enhanced_orchestrator import EnhancedChatbotOrchestrator  # ← NUEVO
+from src.chatbot.conversation_memory import ConversationMemory
 from src.auth.mock_auth import MockAuthService
 from src.conversation.mock_store import MockConversationStore
 from src.api.routes_mock import auth_bp, chat_bp, admin_bp
@@ -75,6 +78,9 @@ VAE_DECODER = None
 VAE_SCALER = None
 ORCHESTRATOR_READY = False
 
+# Memoria de conversaciones por sesión (en memoria). Clave: session_id
+CONVERSATION_MEMORIES = {}
+
 def load_ml_model():
     """Cargar el modelo de ML entrenado (se ejecuta una sola vez)"""
     global ML_MODEL, MODEL_FEATURES, MODEL_LOADED
@@ -110,7 +116,7 @@ def load_orchestrator():
     global CHATBOT_ORCHESTRATOR, VAE_ENCODER, VAE_DECODER, VAE_SCALER, ORCHESTRATOR_READY
     
     try:
-        # Intentar cargar VAE (opcional)
+
         vae_encoder_path = Path('PROYECTO SIUUU/models/vae_encoder.h5')
         vae_decoder_path = Path('PROYECTO SIUUU/models/vae_decoder.h5')
         vae_scaler_path = Path('PROYECTO SIUUU/models/vae_scaler.pkl')
@@ -137,27 +143,60 @@ def load_orchestrator():
             else:
                 logger.info("ℹ Modelos VAE no encontrados - procedeiendo sin ellos")
 
-        # ✅ USAR ORQUESTADOR MEJORADO CON CASE MANAGER
-        CHATBOT_ORCHESTRATOR = EnhancedChatbotOrchestrator(
-            ml_model=ML_MODEL,
-            vae_encoder=VAE_ENCODER,
-            vae_decoder=VAE_DECODER,
-            vae_scaler=VAE_SCALER,
-            vae_features=MODEL_FEATURES
-        )
-        
-        # Actualizar variables globales
-        globals()['CHATBOT_ORCHESTRATOR'] = CHATBOT_ORCHESTRATOR
-        globals()['ORCHESTRATOR_READY'] = True
-        
-        ORCHESTRATOR_READY = True
-        logger.info("✓ EnhancedChatbotOrchestrator inicializado (con Case Manager)")
-        logger.info("✅ Case Manager ACTIVO - Ahora detecta urgencia y busca soluciones")
-        return True
-        
+
+        try:
+            CHATBOT_ORCHESTRATOR = EnhancedChatbotOrchestrator(
+                ml_model=ML_MODEL,
+                vae_encoder=VAE_ENCODER,
+                vae_decoder=VAE_DECODER,
+                vae_scaler=VAE_SCALER,
+                vae_features=MODEL_FEATURES
+            )
+
+            # Actualizar variables globales
+            globals()['CHATBOT_ORCHESTRATOR'] = CHATBOT_ORCHESTRATOR
+            globals()['ORCHESTRATOR_READY'] = True
+            ORCHESTRATOR_READY = True
+            logger.info("✓ EnhancedChatbotOrchestrator inicializado (con Case Manager)")
+            logger.info("✅ Case Manager ACTIVO - Ahora detecta urgencia y busca soluciones")
+            return True
+
+        except Exception as e_inner:
+            # Si falla la inicialización del Enhanced, hacer fallback a la versión base
+            logger.warning(f"⚠️ No fue posible inicializar EnhancedChatbotOrchestrator: {str(e_inner)}")
+            logger.debug(traceback.format_exc())
+
+            try:
+                # Crear un orquestador base (degradado) que aun permita NLP y predicciones ML
+                CHATBOT_ORCHESTRATOR = ChatbotOrchestrator(
+                    ml_model=ML_MODEL,
+                    vae_encoder=None,
+                    vae_decoder=None,
+                    vae_scaler=None,
+                    vae_features=MODEL_FEATURES
+                )
+
+                # Marcar como degradado para que el código pueda saberlo
+                setattr(CHATBOT_ORCHESTRATOR, 'degraded', True)
+
+                globals()['CHATBOT_ORCHESTRATOR'] = CHATBOT_ORCHESTRATOR
+                globals()['ORCHESTRATOR_READY'] = True
+                ORCHESTRATOR_READY = True
+                logger.warning("⚠️ Orquestador inicializado en modo DEGRADADO (sin Case Manager / VAE)")
+                return True
+
+            except Exception as e_fallback:
+                logger.error(f"✗ Error inicializando orquestador fallback: {str(e_fallback)}")
+                logger.debug(traceback.format_exc())
+                ORCHESTRATOR_READY = False
+                globals()['CHATBOT_ORCHESTRATOR'] = None
+                return False
+
     except Exception as e:
-        logger.error(f"✗ Error inicializando orquestador: {str(e)}")
+        logger.error(f"✗ Error inesperado inicializando orquestador: {str(e)}")
+        logger.debug(traceback.format_exc())
         ORCHESTRATOR_READY = False
+        globals()['CHATBOT_ORCHESTRATOR'] = None
         return False
 
 # ==================== RUTAS DEL FRONTEND ====================
@@ -217,82 +256,220 @@ def send_message():
     }
     """
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
         user_message = data.get('message', '')
         session_id = data.get('session_id', None)
+        # Normalizar session_id
+        if not session_id:
+            session_id = 'anonymous_' + (request.remote_addr or 'local')
+
+        # Asegurar memoria por sesión
+        memory = CONVERSATION_MEMORIES.get(session_id)
+        if not memory:
+            memory = ConversationMemory(user_id=session_id)
+            CONVERSATION_MEMORIES[session_id] = memory
+
+        # Asignar memoria al orquestador para mantener contexto entre llamadas
+        if CHATBOT_ORCHESTRATOR:
+            CHATBOT_ORCHESTRATOR.conversation_memory = memory
+            CHATBOT_ORCHESTRATOR.response_generator.set_conversation_memory(memory)
+            CHATBOT_ORCHESTRATOR.user_id = session_id
         conversation_history = data.get('conversation_history', [])
-        
+        user_data = data.get('user_data', {}) or {}
+        consent = bool(data.get('consent', False))
+        auto_activate_case = bool(data.get('auto_activate_case', False))
+
         if not user_message:
             return jsonify({'error': 'Mensaje vacío'}), 400
-        
+
         logger.info(f"📨 Mensaje recibido: {user_message[:50]}...")
-        
-        # Usar el orquestador mejorado si está disponible
-        if ORCHESTRATOR_READY and CHATBOT_ORCHESTRATOR:
+
+        if not ORCHESTRATOR_READY or CHATBOT_ORCHESTRATOR is None:
+            logger.error("Orquestador no disponible al procesar mensaje")
+            return jsonify({'error': 'Orquestador no disponible. Reinicia la aplicación.'}), 503
+
+        try:
+            logger.info("✅ Procesando mensaje con orquestador")
+            # Si el cliente pide el bot simple, usarlo (modo determinista)
+            if data.get('simple_script'):
+                try:
+                    from src.chatbot.simple_script_bot import SimpleScriptBot
+                    bot = SimpleScriptBot()
+                    conv_id = data.get('conversation_id')
+                    email_like = session_id
+
+                    # Persistir mensaje del usuario en conversation_store si conv_id está presente
+                    if conv_id:
+                        try:
+                            conversation_store.add_message(user_email=email_like, conv_id=conv_id, sender='user', content=user_message, entities={})
+                        except Exception:
+                            pass
+
+                    result = bot.process_message(user_message, user_email=email_like, conv_id=conv_id)
+
+                    # Persistir respuesta del bot en conversation_store si conv_id está presente
+                    if conv_id and isinstance(result, dict):
+                        try:
+                            conversation_store.add_message(user_email=email_like, conv_id=conv_id, sender='bot', content=result.get('response', ''), entities=result.get('entities', {}))
+                        except Exception:
+                            pass
+
+                except Exception:
+                    logger.exception('Error iniciando SimpleScriptBot, fallback a orquestador')
+                    result = CHATBOT_ORCHESTRATOR.process_message(user_message, user_data)
+
+            else:
+                # Usar process_message_with_case_management si existe, sino process_message
+                if hasattr(CHATBOT_ORCHESTRATOR, 'process_message_with_case_management'):
+                    result = CHATBOT_ORCHESTRATOR.process_message_with_case_management(
+                        user_message=user_message,
+                        conversation_history=conversation_history
+                    )
+                else:
+                    result = CHATBOT_ORCHESTRATOR.process_message(user_message, user_data)
+
+            # Guardar interacción
+            add_message_to_log(
+                user_id=session_id or 'anonymous',
+                role='user',
+                content=user_message,
+                metadata={'intent': result.get('intent')}
+            )
+
+            add_message_to_log(
+                user_id=session_id or 'anonymous',
+                role='assistant',
+                content=result.get('response', ''),
+                metadata={'generated_by': result.get('generated_by')}
+            )
+
+           
+          
+            region_confirmed = False
             try:
-                logger.info("✅ Procesando con EnhancedChatbotOrchestrator")
-                
-                # ✅ NUEVO: Procesar con gestión de casos
-                result = CHATBOT_ORCHESTRATOR.process_message_with_case_management(
-                    user_message=user_message,
-                    conversation_history=conversation_history
-                )
-                
-                # Log detallado
-                logger.info(f"   └─ Intent: {result.get('intent')}")
-                logger.info(f"   └─ Generated by: {result.get('generated_by')}")
-                
-                if result.get('case_id'):
-                    logger.warning(f"   ⚠️ CASO DETECTADO: {result['case_id']}")
-                    logger.info(f"      └─ Urgencia: {result['urgency']}")
-                    logger.info(f"      └─ Impacto: {result['impact_score']:.0f}/100")
-                    logger.info(f"      └─ Soluciones: {result['solutions_offered']}")
-                
-                # Guardar en base de datos (simulado por ahora)
-                add_message_to_log(
-                    user_id=session_id or 'anonymous',
-                    role='user',
-                    content=user_message,
-                    metadata={
-                        'case_id': result.get('case_id'),
-                        'intent': result.get('intent')
-                    }
-                )
-                
+                region_confirmed = bool(getattr(memory, 'region_confirmed_by_user', False))
+            except Exception:
+                region_confirmed = False
+
+            # Protección adicional: no ejecutar predict_and_plan hasta que la conversación
+            # esté en una etapa adecuada (analyzing/proposing) o hasta que tengamos
+            # el conjunto completo de features en user_data. Esto evita ofrecer
+            # automáticamente soluciones antes de haber clarificado región/problema.
+            can_run_predict = False
+            try:
+                convo_stage = getattr(memory, 'conversation_stage', None)
+                # Ejecutar predict sólo en etapas de análisis o propuestas
+                if convo_stage in ('analyzing', 'proposing'):
+                    can_run_predict = True
+            except Exception:
+                convo_stage = None
+
+            # También permitir ejecución si user_data contiene todas las features requeridas
+            required_features = [
+                'poblacion_total', 'porcentaje_rural', 'estrato_promedio',
+                'tasa_pobreza', 'num_instituciones', 'computadores_por_estudiante',
+                'salones_por_institucion', 'docentes_por_institucion',
+                'cobertura_electrica', 'cobertura_4g',
+                'dispositivos_promedio_hogar', 'tasa_aprobacion',
+                'tasa_desercion', 'puntaje_pruebas'
+            ]
+
+            has_all_features = isinstance(user_data, dict) and all(f in user_data for f in required_features)
+
+            if MODEL_LOADED and ML_MODEL is not None and isinstance(user_data, dict) and consent and (
+                    (region_confirmed or bool(user_data.get('region'))) and (can_run_predict or has_all_features)):
+                try:
+                    plan = CHATBOT_ORCHESTRATOR.predict_and_plan(user_data)
+                    if plan and plan.get('executed'):
+                        result['prediction'] = {
+                            'prediction': plan.get('prediction'),
+                            'probability_with_access': plan.get('probability_with_access'),
+                            'interpretation': plan.get('interpretation')
+                        }
+                        result['action_plan'] = plan.get('action_plan')
+                        result['auto_activate_recommended'] = plan.get('auto_activate_recommended', False)
+
+                        add_message_to_log(
+                            user_id=session_id or 'anonymous',
+                            role='assistant',
+                            content='Se ofreció plan de acción basado en predicción ML',
+                            metadata={'prediction': plan.get('prediction'), 'action_plan': plan.get('action_plan')}
+                        )
+
+                        # response_long
+                        response_long = result.get('response', '') + '\n\nPlan de acción sugerido:\n'
+                        for i, step in enumerate(plan.get('action_plan', []), start=1):
+                            response_long += f"{i}. {step}\n"
+                        result['response_long'] = response_long
+
+                        
+                        if (plan.get('prediction') == 0 and plan.get('auto_activate_recommended')
+                                and auto_activate_case and consent
+                                and isinstance(CHATBOT_ORCHESTRATOR, EnhancedChatbotOrchestrator)):
+                            try:
+                                cm = CHATBOT_ORCHESTRATOR.case_manager
+                                problem_analysis = cm.analyze_conversation(
+                                    user_id=session_id or 'anonymous',
+                                    message=user_message,
+                                    conversation_history=conversation_history
+                                )
+                                case = cm.create_case(session_id or 'anonymous', problem_analysis)
+                                solutions = cm.find_matching_solutions(case)
+                                activated = False
+                                activation_info = None
+                                if solutions:
+                                    sol = solutions[0]
+                                    activated = cm.activate_solution(case, sol)
+                                    activation_info = {
+                                        'solution_id': sol.solution_id,
+                                        'solution_type': sol.type.value,
+                                        'sponsor': sol.sponsor_name,
+                                        'activated': activated
+                                    }
+                                result['case_activated'] = activated
+                                result['case_id'] = case.case_id
+                                result['activated_solution'] = activation_info
+                                add_message_to_log(
+                                    user_id=session_id or 'anonymous',
+                                    role='assistant',
+                                    content=f"Caso {case.case_id} creado y activación: {activated}",
+                                    metadata={'activation_info': activation_info}
+                                )
+                            except Exception:
+                                logger.exception('Error al intentar auto-activar caso')
+
+                except Exception:
+                    logger.exception('Error al ejecutar predict_and_plan')
+
+            sanitized = sanitize_result_no_emoji(result)
+            return jsonify(sanitized), 200
+
+        except AttributeError as ae:
+            logger.warning(f"Fallo por AttributeError en orquestador: {ae}")
+            logger.debug(traceback.format_exc())
+            try:
+                base_result = CHATBOT_ORCHESTRATOR.process_message(user_message, user_data)
                 add_message_to_log(
                     user_id=session_id or 'anonymous',
                     role='assistant',
-                    content=result['response'],
-                    metadata={
-                        'case_id': result.get('case_id'),
-                        'generated_by': result.get('generated_by'),
-                        'urgency': result.get('urgency')
-                    }
+                    content=base_result.get('response', ''),
+                    metadata={'generated_by': 'fallback_base'}
                 )
-                
-                return jsonify(result), 200
-            
-            except Exception as e:
-                logger.error(f"❌ Error en orquestador: {str(e)}")
-                import traceback
-                logger.error(traceback.format_exc())
-        
-        # Fallback: respuesta simple
-        logger.warning("⚠️ Orquestador NO disponible, respuesta por defecto")
-        response = {
-            'response': 'Gracias por escribir. Estoy aquí para ayudarte. ¿Puedes contarme más sobre tu situación?',
-            'intent': 'general',
-            'confidence': 0.0,
-            'case_id': None,
-            'requires_action': False,
-            'generated_by': 'fallback',
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        return jsonify(response), 200
+                return jsonify(base_result), 200
+            except Exception:
+                logger.exception('Fallback base falló')
+                return jsonify({'error': 'Error procesando mensaje'}), 500
+
+        except Exception as e:
+            logger.exception(f"Error procesando con orquestador: {e}")
+            return jsonify({'error': 'Error interno del servidor'}), 500
+
+    except Exception as e:
+        logger.exception(f"Error procesando mensaje: {e}")
+        return jsonify({'error': 'Error interno del servidor'}), 500
         
     except Exception as e:
-        logger.error(f"❌ Error procesando mensaje: {str(e)}")
+        logger.error(f" Error procesando mensaje: {str(e)}")
         return jsonify({'error': 'Error interno del servidor'}), 500
 
 
@@ -306,9 +483,39 @@ def add_message_to_log(user_id: str, role: str, content: str, metadata: Dict = N
             'content': content[:200],  # Truncar para logging
             'metadata': metadata or {}
         }
-        logger.info(f"📝 {role.upper()}: {log_entry}")
+        logger.info(f"{role.upper()}: {log_entry}")
     except Exception as e:
         logger.warning(f"Error logging message: {e}")
+
+
+### Utilities: emoji stripping and sanitization #################################
+emoji_pattern = re.compile('[\U0001F600-\U0001F64F'  # emoticons
+                           '\U0001F300-\U0001F5FF'  # symbols & pictographs
+                           '\U0001F680-\U0001F6FF'  # transport & map
+                           '\U0001F1E0-\U0001F1FF'  # flags
+                           '\u2600-\u26FF'          # misc symbols
+                           '\u2700-\u27BF]+', flags=re.UNICODE)
+
+def strip_emojis(text: str) -> str:
+    if not isinstance(text, str):
+        return text
+    return emoji_pattern.sub('', text).strip()
+
+def sanitize_result_no_emoji(result: Dict) -> Dict:
+    """Remove emojis from textual fields to produce a cleaner message for UI."""
+    if not isinstance(result, dict):
+        return result
+    if 'response' in result:
+        result['response'] = strip_emojis(result.get('response', ''))
+    if 'response_long' in result:
+        result['response_long'] = strip_emojis(result.get('response_long', ''))
+    if 'action_plan' in result and isinstance(result['action_plan'], list):
+        result['action_plan'] = [strip_emojis(s) for s in result['action_plan']]
+    if 'improvements' in result and isinstance(result['improvements'], dict):
+        for p in result['improvements'].get('proposals', []):
+            if isinstance(p, dict) and 'summary' in p:
+                p['summary'] = strip_emojis(p.get('summary', ''))
+    return result
 
 @app.route('/api/resources', methods=['GET'])
 def get_resources():
@@ -393,14 +600,14 @@ def activate_case(case_id):
         )
         
         if result['success']:
-            logger.info(f"✅ Caso {case_id} activado con éxito")
+            logger.info(f" Caso {case_id} activado con éxito")
             return jsonify(result), 200
         else:
-            logger.warning(f"⚠️ Error activando caso {case_id}")
+            logger.warning(f" Error activando caso {case_id}")
             return jsonify(result), 400
     
     except Exception as e:
-        logger.error(f"❌ Error en activate_case: {str(e)}")
+        logger.error(f" Error en activate_case: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
@@ -461,7 +668,6 @@ def get_case_impact(case_id):
         logger.error(f"Error generando reporte de impacto: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# ==================== ENDPOINT DE PREDICCIÓN ML ====================
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
@@ -485,14 +691,13 @@ def predict():
     }
     """
     try:
-        # Validar que el modelo esté cargado
+
         if not MODEL_LOADED or ML_MODEL is None:
             return jsonify({
                 'success': False,
                 'error': 'Modelo ML no disponible. Reinicia la aplicación.'
             }), 503
-        
-        # Obtener datos del request
+
         data = request.get_json()
         
         if not data:
@@ -501,7 +706,6 @@ def predict():
                 'error': 'No se enviaron datos'
             }), 400
         
-        # Construir vector de features en el orden correcto
         try:
             input_values = []
             missing_features = []
@@ -526,13 +730,12 @@ def predict():
                     'required_features': MODEL_FEATURES
                 }), 400
             
-            # Preparar input como matriz 2D (el modelo espera (n_samples, n_features))
+
             X_input = np.array([input_values]).reshape(1, -1)
             
-            # Hacer predicción
+
             prediction = ML_MODEL.predict(X_input)[0]
-            
-            # Obtener probabilidades si el modelo las soporta
+
             try:
                 prediction_proba = ML_MODEL.predict_proba(X_input)[0]
                 proba_list = prediction_proba.tolist()
@@ -541,8 +744,8 @@ def predict():
             
             # Interpretación de la predicción
             interpretation_map = {
-                0: "🔴 Sin acceso a internet - Se requieren recursos de conectividad",
-                1: "🟢 Con acceso a internet - Buena cobertura digital"
+                0: "🔴Sin acceso a internet - Se requieren recursos de conectividad",
+                1: "Con acceso a internet - Buena cobertura digital"
             }
             
             interpretation = interpretation_map.get(int(prediction), "Predicción completada")
@@ -636,34 +839,11 @@ def predict_batch():
             'error': 'Error interno del servidor'
         }), 500
 
-# ==================== ENDPOINTS DEL ORQUESTADOR ====================
+
 
 @app.route('/api/chat-intelligent', methods=['POST'])
 def chat_intelligent():
-    """
-    Endpoint para chat inteligente con todos los componentes del orquestador
-    (NLP + Predicción + Generación de mejoras)
-    
-    Request JSON:
-    {
-        "message": "Hola, soy de Bogotá",
-        "user_data": {
-            "poblacion_total": 16295,
-            ... (todos los 14 features opcionales)
-        }
-    }
-    
-    Response JSON:
-    {
-        "response": "Respuesta inteligente del bot...",
-        "intent": "saludar",
-        "intent_confidence": 0.95,
-        "entities": { "region": "Bogotá", ... },
-        "prediction": { "executed": true, "prediction": 1, ... },
-        "improvements": { "executed": true, "proposals": [...] },
-        "timestamp": "..."
-    }
-    """
+   
     try:
         if not ORCHESTRATOR_READY or CHATBOT_ORCHESTRATOR is None:
             return jsonify({
@@ -671,17 +851,46 @@ def chat_intelligent():
                 'error': 'Orquestador no disponible. Reinicia la aplicación.'
             }), 503
         
-        data = request.get_json()
+        data = request.get_json() or {}
         user_message = data.get('message', '')
-        user_data = data.get('user_data', None)
-        
+        user_data = data.get('user_data', {}) or {}
+        consent = bool(data.get('consent', False))
+
         if not user_message:
             return jsonify({'error': 'Mensaje vacío'}), 400
-        
-        # Procesar con el orquestador
+
+        # Procesar mensaje con orquestador
         result = CHATBOT_ORCHESTRATOR.process_message(user_message, user_data)
-        
-        return jsonify(result), 200
+
+        # Ejecutar predicción y plan si hay consentimiento y modelo
+        try:
+            if MODEL_LOADED and ML_MODEL is not None and consent and isinstance(user_data, dict):
+                plan = CHATBOT_ORCHESTRATOR.predict_and_plan(user_data)
+                if plan and plan.get('executed'):
+                    result['prediction'] = {
+                        'prediction': plan.get('prediction'),
+                        'probability_with_access': plan.get('probability_with_access')
+                    }
+                    result['action_plan'] = plan.get('action_plan')
+
+                    # Trazabilidad
+                    add_message_to_log(
+                        user_id='system',
+                        role='assistant',
+                        content='Plan de acción generado desde chat_intelligent',
+                        metadata={'prediction': plan.get('prediction')}
+                    )
+
+                    # response_long
+                    long_text = result.get('response', '') + '\n\nPlan de acción sugerido:\n'
+                    for i, step in enumerate(plan.get('action_plan', []), start=1):
+                        long_text += f"{i}. {step}\n"
+                    result['response_long'] = long_text
+        except Exception:
+            logger.debug('Error ejecutando predict_and_plan en chat_intelligent', exc_info=True)
+
+        sanitized = sanitize_result_no_emoji(result)
+        return jsonify(sanitized), 200
     
     except Exception as e:
         logger.error(f"Error en chat inteligente: {str(e)}")
@@ -755,7 +964,7 @@ def health_check():
         'version': '1.0.0'
     }), 200
 
-# ==================== MANEJO DE ERRORES ====================
+
 
 @app.errorhandler(404)
 def not_found(error):
@@ -768,27 +977,23 @@ def internal_error(error):
     logger.error(f"Error 500: {str(error)}")
     return jsonify({'error': 'Error interno del servidor'}), 500
 
-# ==================== EJECUCIÓN ====================
+
 
 if __name__ == '__main__':
-    # Registrar blueprints de las rutas mock (auth, chat, admin)
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(chat_bp)
     app.register_blueprint(admin_bp)
-    
-    # Crear directorio de logs si no existe
+
     os.makedirs('logs', exist_ok=True)
     
-    # ✓ CARGAR MODELO ML UNA SOLA VEZ al iniciar la aplicación
     logger.info("=" * 60)
     logger.info("INICIALIZANDO APLICACIÓN")
     logger.info("=" * 60)
     load_ml_model()
-    
-    # ✓ CARGAR ORQUESTADOR CONVERSACIONAL
+
     load_orchestrator()
-    
-    # Configuración del servidor
+
     host = os.getenv('HOST', '127.0.0.1')
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('DEBUG', 'False') == 'True'

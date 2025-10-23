@@ -43,6 +43,8 @@ class ConversationMemory:
         
         # Estado persistente de la conversación
         self.confirmed_region: Optional[str] = None  # Región detectada
+        # Indica si la región fue confirmada explícitamente por el usuario
+        self.region_confirmed_by_user: bool = False
         self.primary_problem: Optional[str] = None  # Problema principal (conectividad, educación, etc.)
         self.all_keywords: Set[str] = set()  # Todas las palabras clave mencionadas
         self.asked_about: Set[str] = set()  # Preguntas ya hechas
@@ -92,8 +94,10 @@ class ConversationMemory:
         
         # Actualizar región (una vez detectada, no cambia)
         if msg_context.region and not self.confirmed_region:
+            # Solo marcar región como confirmada cuando venga como entidad del mensaje
             self.confirmed_region = msg_context.region
-            logger.info(f"Región confirmada: {self.confirmed_region}")
+            self.region_confirmed_by_user = True
+            logger.info(f"Región confirmada por usuario: {self.confirmed_region}")
         
         # Actualizar problema principal
         if msg_context.intent in ['conectividad', 'educacion', 'mejora']:
@@ -135,6 +139,7 @@ class ConversationMemory:
         """Obtiene un resumen del contexto actual"""
         return {
             'confirmed_region': self.confirmed_region,
+            'region_confirmed_by_user': self.region_confirmed_by_user,
             'primary_problem': self.primary_problem,
             'keywords': list(self.all_keywords),
             'stage': self.conversation_stage,
@@ -188,6 +193,7 @@ class ConversationMemory:
         return {
             'user_id': self.user_id,
             'confirmed_region': self.confirmed_region,
+            'region_confirmed_by_user': self.region_confirmed_by_user,
             'primary_problem': self.primary_problem,
             'keywords': list(self.all_keywords),
             'conversation_stage': self.conversation_stage,
@@ -207,3 +213,60 @@ class ConversationMemory:
         self.user_profile = {}
         self.related_intents = []
         logger.info(f"ConversationMemory reiniciada para usuario: {self.user_id}")
+
+    def load_from_store(self, store_messages: List[Dict]) -> None:
+        """Carga el historial guardado (por ejemplo desde MockConversationStore) en la memoria.
+
+        El almacén tiene mensajes intercalados por 'sender' ('user' / 'bot'). Este método
+        intenta emparejar cada mensaje de usuario con la respuesta del bot siguiente
+        (si existe) y recrear las entradas en la memoria de conversación de forma
+        compatible con `add_message` para que el estado (región, problemas, asked_about)
+        quede consistente.
+        """
+        if not store_messages:
+            return
+
+        i = 0
+        while i < len(store_messages):
+            msg = store_messages[i]
+            try:
+                sender = msg.get('sender')
+            except Exception:
+                i += 1
+                continue
+
+            # Solo procesamos entradas de usuario (las de bot las asociaremos)
+            if sender == 'user':
+                user_message = msg.get('content', '')
+                intent = msg.get('intent') or 'general'
+                entities = msg.get('entities', {}) or {}
+                confidence = 0.5
+
+                bot_response = ''
+                is_question = False
+                question_topic = None
+
+                # Si el siguiente mensaje existe y es del bot, usarlo como respuesta
+                if i + 1 < len(store_messages) and store_messages[i + 1].get('sender') == 'bot':
+                    bot_msg = store_messages[i + 1]
+                    bot_response = bot_msg.get('content', '')
+                    # Simple heurística para determinar si el bot preguntó algo
+                    is_question = isinstance(bot_response, str) and bot_response.strip().endswith('?')
+                    i += 1  # consumir también el mensaje del bot
+
+                # Añadir a la memoria (esto actualizará estado como región, problemas, keywords)
+                try:
+                    self.add_message(
+                        user_message=user_message,
+                        intent=intent,
+                        confidence=confidence,
+                        entities=entities,
+                        bot_response=bot_response,
+                        is_question=is_question,
+                        question_topic=question_topic
+                    )
+                except Exception as e:
+                    logger.debug(f"Error añadiendo mensaje desde store a memoria: {e}")
+
+            # Si encontramos un mensaje del bot sin mensaje de usuario previo, lo ignoramos
+            i += 1

@@ -161,9 +161,9 @@ test_conversations = [
 for message in test_conversations:
     try:
         result = orchestrator.process_message(message)
-        print(f"\n  📤 Usuario: {message}")
-        print(f"  📥 Bot: {result['response'][:60]}...")
-        print(f"  🎯 Intención: {result['intent']} ({result['intent_confidence']:.0%})")
+        print(f"\n   Usuario: {message}")
+        print(f"   Bot: {result['response'][:60]}...")
+        print(f"   ntención: {result['intent']} ({result['intent_confidence']:.0%})")
     except Exception as e:
         print(f"  ✗ Error procesando '{message}': {e}")
 

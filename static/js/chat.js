@@ -121,6 +121,9 @@ async function sendMessageToAPI(message) {
         body: JSON.stringify({
             message: message,
             session_id: sessionId
+            ,
+            // Usar SimpleScriptBot por defecto
+            simple_script: true
         })
     });
     

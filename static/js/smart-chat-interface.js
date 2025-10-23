@@ -110,7 +110,8 @@ class SmartChatInterface {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            // Si enviamos al endpoint /api/message, activar simple_script por defecto
+            body: JSON.stringify(endpoint === '/api/message' ? Object.assign({}, payload, { simple_script: true }) : payload)
         });
         
         if (!response.ok) {
@@ -154,6 +155,11 @@ class SmartChatInterface {
         if (response.improvements && response.improvements.executed) {
             this.displayImprovements(response.improvements);
         }
+
+        // Si hay un plan de acción y el backend recomienda activación, mostrar opción al usuario
+        if (response.action_plan && response.auto_activate_recommended) {
+            this.showActivationPrompt(response.action_plan, response.case_id || null);
+        }
         
         // Actualizar región si se detectó
         if (response.region) {
@@ -172,7 +178,7 @@ class SmartChatInterface {
         intentDiv.className = 'chat-intent-info';
         intentDiv.innerHTML = `
             <small>
-                🎯 Intención: <strong>${response.intent}</strong> 
+                 Intención: <strong>${response.intent}</strong> 
                 (confianza: ${(response.intent_confidence * 100).toFixed(1)}%)
             </small>
         `;
@@ -245,6 +251,59 @@ class SmartChatInterface {
         html += `</div>`;
         impDiv.innerHTML = html;
         this.chatContainer.appendChild(impDiv);
+    }
+
+    /**
+     * Mostrar prompt para activar caso (si el backend lo recomienda)
+     */
+    showActivationPrompt(action_plan, caseId = null) {
+        const promptDiv = document.createElement('div');
+        promptDiv.className = 'chat-activation-prompt';
+
+        let html = `<div class="activation-header">🔔 Se detectó una necesidad urgente</div>`;
+        html += `<div class="activation-body">`; 
+        html += `<p>Se recomienda activar un caso para gestionar soluciones. ¿Deseas que lo activemos ahora?</p>`;
+        html += `<ul>`;
+        action_plan.forEach(step => { html += `<li>${step}</li>`; });
+        html += `</ul>`;
+        html += `</div>`;
+        html += `<div class="activation-actions"><button class="btn-activate">Activar caso</button> <button class="btn-decline">No, luego</button></div>`;
+
+        promptDiv.innerHTML = html;
+        this.chatContainer.appendChild(promptDiv);
+
+        // Attach handlers
+        promptDiv.querySelector('.btn-activate').addEventListener('click', async () => {
+            // Enviar confirmación al servidor para activar
+            try {
+                const payload = {
+                    message: 'Usuario confirma activación de caso',
+                    user_data: this.lastPrediction ? this.lastPrediction.data : {},
+                    consent: true,
+                    auto_activate_case: true
+                };
+
+                const resp = await fetch('/api/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resp.ok) throw new Error('Error activando caso');
+
+                const json = await resp.json();
+                this.displayMessage(json.response || 'Caso activado', 'bot');
+                promptDiv.remove();
+            } catch (err) {
+                console.error('Error activando caso:', err);
+                this.displayMessage('Error activando caso. Intenta nuevamente.', 'bot-error');
+            }
+        });
+
+        promptDiv.querySelector('.btn-decline').addEventListener('click', () => {
+            promptDiv.remove();
+            this.displayMessage('De acuerdo, no activaré el caso ahora.', 'bot');
+        });
     }
     
     /**

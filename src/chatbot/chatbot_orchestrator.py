@@ -79,8 +79,16 @@ class IntentDetector:
             
             # Búsqueda por keywords
             for keyword in intent_data['keywords']:
-                if keyword in user_message_lower:
-                    score += 2
+                # Match keywords as whole words/phrases to avoid partial matches
+                try:
+                    kw_pattern = r"\b" + re.escape(keyword.lower()) + r"\b"
+                    if re.search(kw_pattern, user_message_lower):
+                        score += 2
+                        continue
+                except re.error:
+                    # Fallback simple substring match if regex fails for any reason
+                    if keyword in user_message_lower:
+                        score += 2
             
             # Búsqueda por patterns
             for pattern in intent_data['patterns']:
@@ -128,9 +136,18 @@ class EntityExtractor:
     
     def _extract_region(self, message_lower: str) -> Optional[str]:
         """Extrae nombre de región si existe"""
+        # Detect a region mention. Users sometimes reply only with the
+        # region name (e.g. "Antioquia") without a phrase like "soy de",
+        # so accept direct mentions as valid region entities.
+        triggers = ['soy de', 'vivo en', 'nací en', 'mi ciudad', 'en la región', 'en el municipio', 'en']
+
         for region in self.regiones:
             if region in message_lower:
+                # If the user explicitly mentions the region anywhere in the
+                # message, return it. This makes the extractor more forgiving
+                # for short replies like "Antioquia" or "Bogotá".
                 return region.title()
+
         return None
     
     def _extract_numbers(self, message: str) -> List[float]:
@@ -331,10 +348,11 @@ class ResponseGenerator:
     def _generate_connectivity_response(self, region: str, keywords: set, context: Dict) -> Tuple[str, bool, Optional[str]]:
         """Respuesta sobre conectividad"""
         
-        if not region and not context.get('confirmed_region'):
+        # If no explicit region provided and memory does not contain an explicitly confirmed region, ask
+        if not region and not (context.get('confirmed_region') and context.get('region_confirmed_by_user')):
             return "La conectividad es crucial. ¿De qué región eres?", True, 'region'
-        
-        confirmed_region = region or context.get('confirmed_region')
+
+        confirmed_region = region or (context.get('confirmed_region') if context.get('region_confirmed_by_user') else None)
         
         if 'mejorar' in keywords or 'problema' in keywords:
             return f"Entiendo que necesitas mejorar conectividad en {confirmed_region}. ¿Cuál es tu acceso actual a internet?", True, 'current_connectivity'
@@ -344,8 +362,8 @@ class ResponseGenerator:
     def _generate_education_response(self, region: str, keywords: set, context: Dict) -> Tuple[str, bool, Optional[str]]:
         """Respuesta sobre educación"""
         
-        confirmed_region = region or context.get('confirmed_region')
-        
+        confirmed_region = region or (context.get('confirmed_region') if context.get('region_confirmed_by_user') else None)
+
         if not confirmed_region:
             return "La educación es fundamental. ¿De qué región eres?", True, 'region'
         
@@ -354,8 +372,8 @@ class ResponseGenerator:
     def _generate_improvement_response(self, region: str, keywords: set, context: Dict) -> Tuple[str, bool, Optional[str]]:
         """Respuesta sobre mejoras"""
         
-        confirmed_region = region or context.get('confirmed_region')
-        
+        confirmed_region = region or (context.get('confirmed_region') if context.get('region_confirmed_by_user') else None)
+
         if not confirmed_region:
             return "Para proponer mejoras, primero necesito saber tu región.", True, 'region'
         
@@ -366,8 +384,7 @@ class ResponseGenerator:
     
     def _generate_prediction_response(self, region: str, prediction_result: Dict, context: Dict) -> str:
         """Respuesta para predicción"""
-        
-        confirmed_region = region or context.get('confirmed_region') or 'tu región'
+        confirmed_region = region or (context.get('confirmed_region') if context.get('region_confirmed_by_user') else None) or 'tu región'
         
         if not prediction_result or not prediction_result.get('executed'):
             return f"Para hacer una predicción en {confirmed_region}, necesito 14 indicadores específicos. ¿Los tienes?"
@@ -383,8 +400,8 @@ class ResponseGenerator:
     def _generate_report_response(self, region: str, context: Dict) -> Tuple[str, bool, Optional[str]]:
         """Respuesta para reporte"""
         
-        confirmed_region = region or context.get('confirmed_region')
-        
+        confirmed_region = region or (context.get('confirmed_region') if context.get('region_confirmed_by_user') else None)
+
         if not confirmed_region:
             return "Para generar un reporte, ¿de qué región?", True, 'region'
         
@@ -624,6 +641,75 @@ class ChatbotOrchestrator:
         
         except Exception as e:
             logger.error(f"Error generando mejoras: {str(e)}")
+            return {'executed': False, 'error': str(e)}
+
+    def predict_and_plan(self, user_data: Dict) -> Dict:
+        """Ejecuta la predicción ML y mapea a un plan de acción concreto.
+
+        Retorna:
+            {
+                'executed': bool,
+                'prediction': 0|1 or None,
+                'probability': float or None,
+                'interpretation': str,
+                'action_plan': [str,...],
+                'auto_activate_recommended': bool
+            }
+        """
+        if self.ml_model is None:
+            return {'executed': False, 'reason': 'modelo_no_disponible'}
+
+        required_features = [
+            'poblacion_total', 'porcentaje_rural', 'estrato_promedio',
+            'tasa_pobreza', 'num_instituciones', 'computadores_por_estudiante',
+            'salones_por_institucion', 'docentes_por_institucion',
+            'cobertura_electrica', 'cobertura_4g',
+            'dispositivos_promedio_hogar', 'tasa_aprobacion',
+            'tasa_desercion', 'puntaje_pruebas'
+        ]
+
+        missing = [f for f in required_features if f not in user_data]
+        if missing:
+            return {'executed': False, 'reason': 'datos_incompletos', 'missing_features': missing}
+
+        try:
+            X = np.array([user_data[f] for f in required_features]).reshape(1, -1)
+            pred = int(self.ml_model.predict(X)[0])
+            try:
+                proba = self.ml_model.predict_proba(X)[0]
+                proba_with = float(proba[1]) if len(proba) > 1 else None
+            except Exception:
+                proba_with = None
+
+            interpretation = 'Acceso aceptable' if pred == 1 else 'Riesgo de falta de acceso'
+
+            # Mapear a plan de acción con umbrales básicos
+            action_plan = []
+            auto_activate_recommended = False
+
+            if pred == 0:
+                action_plan = [
+                    'Contactar servicio local para subsidio o conexión prioritaria (gestión social).',
+                    'Proveer alternativas inmediatas: puntos con WiFi comunitario y materiales offline.',
+                    'Solicitar datos de contacto y consentimiento para abrir caso y seguimiento.'
+                ]
+                auto_activate_recommended = True
+            else:
+                action_plan = [
+                    'Reforzar recursos pedagógicos en línea y formación digital.',
+                    'Monitoreo periódico de indicadores para detectar empeoramiento.'
+                ]
+
+            return {
+                'executed': True,
+                'prediction': pred,
+                'probability_with_access': proba_with,
+                'interpretation': interpretation,
+                'action_plan': action_plan,
+                'auto_activate_recommended': auto_activate_recommended
+            }
+        except Exception as e:
+            logger.error(f"Error en predict_and_plan: {e}")
             return {'executed': False, 'error': str(e)}
     
     def get_conversation_history(self) -> List[Dict]:
